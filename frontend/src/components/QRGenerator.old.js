@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import QRCode from 'react-qr-code';
 import api from '../services/api';
 
 const QRGenerator = ({ trainingId, onGenerated, onError }) => {
-  const [qrCodeData, setQrCodeData] = useState(null);
+  const [qrCode, setQrCode] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [trainingInfo, setTrainingInfo] = useState(null);
@@ -21,18 +20,12 @@ const QRGenerator = ({ trainingId, onGenerated, onError }) => {
 
       const response = await api.get(`/qr/trainings/${trainingId}/qr-code`);
       
-      // Extract the QR code data from the response
-      // The old implementation returned a base64 image, but we need the raw data
-      const qrData = response.data.qr_data || response.data.qr_code || `training://${trainingId}`;
-      setQrCodeData(qrData);
+      setQrCode(response.data.qr_code);
       setTrainingInfo(response.data.training);
       setExpiresAt(new Date(response.data.expires_at));
 
       if (onGenerated) {
-        onGenerated({
-          ...response.data,
-          qr_data: qrData
-        });
+        onGenerated(response.data);
       }
 
     } catch (error) {
@@ -57,27 +50,12 @@ const QRGenerator = ({ trainingId, onGenerated, onError }) => {
   };
 
   const handleDownload = () => {
-    if (!qrCodeData) return;
+    if (!qrCode) return;
 
-    const svg = document.getElementById("training-qr-code-svg");
-    const svgData = new XMLSerializer().serializeToString(svg);
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const img = new Image();
-    
-    img.onload = () => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
-      const pngFile = canvas.toDataURL("image/png");
-      
-      const downloadLink = document.createElement("a");
-      downloadLink.download = `training-${trainingId}-qr.png`;
-      downloadLink.href = pngFile;
-      downloadLink.click();
-    };
-    
-    img.src = "data:image/svg+xml;base64," + btoa(svgData);
+    const link = document.createElement('a');
+    link.download = `training-${trainingId}-qr.png`;
+    link.href = qrCode;
+    link.click();
   };
 
   if (!trainingId) {
@@ -106,7 +84,7 @@ const QRGenerator = ({ trainingId, onGenerated, onError }) => {
               <i className={`fas ${loading ? 'fa-spinner fa-spin' : 'fa-sync-alt'} me-1`}></i>
               Refresh
             </button>
-            {qrCodeData && (
+            {qrCode && (
               <button 
                 className="btn btn-success btn-sm"
                 onClick={handleDownload}
@@ -143,24 +121,14 @@ const QRGenerator = ({ trainingId, onGenerated, onError }) => {
             </div>
           )}
 
-          {qrCodeData && !loading && (
+          {qrCode && !loading && (
             <div>
               <div className="qr-code-container mb-3">
-                <div style={{ 
-                  background: 'white', 
-                  padding: '20px', 
-                  borderRadius: '8px',
-                  display: 'inline-block',
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-                }}>
-                  <QRCode
-                    id="training-qr-code-svg"
-                    size={250}
-                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                    value={qrCodeData}
-                    viewBox={`0 0 256 256`}
-                  />
-                </div>
+                <img 
+                  src={qrCode} 
+                  alt="Training QR Code"
+                  className="qr-code-image"
+                />
               </div>
 
               {trainingInfo && (
@@ -213,6 +181,21 @@ const QRGenerator = ({ trainingId, onGenerated, onError }) => {
           margin: 0 auto;
         }
         
+        .qr-code-container {
+          padding: 20px;
+          background: #f8f9fa;
+          border-radius: 8px;
+          display: inline-block;
+        }
+        
+        .qr-code-image {
+          max-width: 250px;
+          width: 100%;
+          height: auto;
+          border: 2px solid #dee2e6;
+          border-radius: 4px;
+        }
+        
         .training-info {
           border-top: 1px solid #dee2e6;
           padding-top: 15px;
@@ -225,6 +208,10 @@ const QRGenerator = ({ trainingId, onGenerated, onError }) => {
         @media (max-width: 768px) {
           .qr-generator {
             margin: 0 10px;
+          }
+          
+          .qr-code-image {
+            max-width: 200px;
           }
         }
       `}</style>

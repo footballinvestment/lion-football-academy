@@ -2,8 +2,9 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/mobile.css';
+import './styles/navbar.css';
 import { AuthProvider } from './context/AuthContext';
-import Navbar from './components/Navbar';
+import ResponsiveNavbar from './components/ResponsiveNavbar';
 import Login from './components/Login';
 import Register from './components/Register';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -30,7 +31,7 @@ function App() {
     <AuthProvider>
       <Router>
         <div className="App">
-          <Navbar />
+          <ResponsiveNavbar />
           <div className="container mt-4">
             <Routes>
               {/* Public routes */}
@@ -100,6 +101,12 @@ function App() {
               
               <Route path="/trainings/:trainingId/qr" element={
                 <ProtectedRoute>
+                  <QRCheckIn />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/qr-checkin" element={
+                <ProtectedRoute requireRoles={['admin', 'coach']}>
                   <QRCheckIn />
                 </ProtectedRoute>
               } />

@@ -1,50 +1,90 @@
-import React, { useState, useCallback } from 'react';
-import { QrReader } from 'react-qr-reader';
+import React, { useState, useEffect, useRef } from 'react';
+import { Html5QrcodeScanner } from 'html5-qrcode';
 import api from '../services/api';
 
 const QRScanner = ({ onScanSuccess, onScanError, playerId }) => {
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState(null);
   const [error, setError] = useState(null);
+  const scannerRef = useRef(null);
+  const html5QrcodeScannerRef = useRef(null);
 
-  const handleResult = useCallback(async (result, scanError) => {
-    if (result) {
-      const qrData = result?.text;
-      
-      try {
-        setError(null);
-        setScanResult('Processing...');
+  useEffect(() => {
+    if (isScanning && scannerRef.current) {
+      startScanner();
+    }
 
-        // Stop the scanner
-        setIsScanning(false);
+    return () => {
+      if (html5QrcodeScannerRef.current) {
+        html5QrcodeScannerRef.current.clear();
+      }
+    };
+  }, [isScanning]);
 
-        // Process the check-in
-        const response = await api.post('/qr/trainings/check-in', {
-          qr_data: qrData,
-          player_id: playerId
-        });
+  const startScanner = () => {
+    if (html5QrcodeScannerRef.current) {
+      html5QrcodeScannerRef.current.clear();
+    }
 
-        setScanResult(`✅ ${response.data.message}`);
-        if (onScanSuccess) {
-          onScanSuccess(response.data);
-        }
+    const html5QrcodeScanner = new Html5QrcodeScanner(
+      "qr-scanner-container",
+      {
+        fps: 10,
+        qrbox: {
+          width: 250,
+          height: 250
+        },
+        aspectRatio: 1.0,
+        showTorchButtonIfSupported: true,
+        showZoomSliderIfSupported: true,
+        defaultZoomValueIfSupported: 2
+      },
+      false
+    );
 
-      } catch (error) {
-        const errorMessage = error.response?.data?.error || 'Check-in failed';
-        setError(errorMessage);
-        setScanResult(null);
-        if (onScanError) {
-          onScanError(errorMessage);
-        }
+    html5QrcodeScannerRef.current = html5QrcodeScanner;
+
+    html5QrcodeScanner.render(
+      (decodedText, decodedResult) => {
+        handleScanSuccess(decodedText);
+      },
+      (error) => {
+        // Ignore scanning errors, they're expected during scanning
+      }
+    );
+  };
+
+  const handleScanSuccess = async (qrData) => {
+    try {
+      setError(null);
+      setScanResult('Processing...');
+
+      // Stop the scanner
+      if (html5QrcodeScannerRef.current) {
+        html5QrcodeScannerRef.current.clear();
+      }
+      setIsScanning(false);
+
+      // Process the check-in
+      const response = await api.post('/qr/trainings/check-in', {
+        qr_data: qrData,
+        player_id: playerId
+      });
+
+      setScanResult(`✅ ${response.data.message}`);
+      if (onScanSuccess) {
+        onScanSuccess(response.data);
+      }
+
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || 'Check-in failed';
+      setError(errorMessage);
+      setScanResult(null);
+      if (onScanError) {
+        onScanError(errorMessage);
       }
     }
-
-    if (scanError) {
-      // Ignore most scanning errors as they're expected during scanning
-      // Only log to console for debugging
-      console.debug('QR Scanner Error:', scanError);
-    }
-  }, [onScanSuccess, onScanError, playerId]);
+  };
 
   const handleStartScan = () => {
     setIsScanning(true);
@@ -53,6 +93,9 @@ const QRScanner = ({ onScanSuccess, onScanError, playerId }) => {
   };
 
   const handleStopScan = () => {
+    if (html5QrcodeScannerRef.current) {
+      html5QrcodeScannerRef.current.clear();
+    }
     setIsScanning(false);
   };
 
@@ -105,21 +148,10 @@ const QRScanner = ({ onScanSuccess, onScanError, playerId }) => {
           {isScanning && (
             <div>
               <div 
-                style={{ 
-                  width: '100%', 
-                  maxWidth: '400px',
-                  margin: '0 auto',
-                  borderRadius: '8px',
-                  overflow: 'hidden'
-                }}
-              >
-                <QrReader
-                  onResult={handleResult}
-                  style={{ width: '100%' }}
-                  constraints={{ facingMode: 'environment' }}
-                  scanDelay={300}
-                />
-              </div>
+                id="qr-scanner-container" 
+                ref={scannerRef}
+                style={{ width: '100%' }}
+              ></div>
               <div className="mt-3 text-center">
                 <small className="text-muted">
                   Position the QR code within the scanning area
@@ -156,6 +188,11 @@ const QRScanner = ({ onScanSuccess, onScanError, playerId }) => {
         .qr-scanner {
           max-width: 400px;
           margin: 0 auto;
+        }
+        
+        #qr-scanner-container {
+          border-radius: 8px;
+          overflow: hidden;
         }
         
         @media (max-width: 768px) {
