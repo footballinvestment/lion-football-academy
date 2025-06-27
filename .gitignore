@@ -15,91 +15,36 @@ backend/src/database/academy.db
 .env.local
 .env.development.local
 .env.test.local
-.env.production
 .env.production.local
 
 # Build outputs
 build/
 dist/
 frontend/build/
-backend/build/
 
-# IDE and OS files
+# IDE files
 .vscode/
 .idea/
-.DS_Store
-Thumbs.db
 *.swp
 *.swo
 
-# Logs and coverage
-logs/
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs
 *.log
+
+# Coverage directory
 coverage/
 .nyc_output
-test-results/
-playwright-report/
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Optional npm cache directory
-.npm
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
-
-# next.js build output
-.next
-
-# nuxt.js build output
-.nuxt
-
-# vuepress build output
-.vuepress/dist
-
-# Serverless directories
-.serverless
-
-# FuseBox cache
-.fusebox/
-
-# DynamoDB Local files
-.dynamodb/
 
 # Temporary folders
 tmp/
 temp/
-
-# MacOS
-.AppleDouble
-.LSOverride
-
-# Windows
-ehthumbs.db
-Desktop.ini
-
-# Linux
-*~
-
-# Testing artifacts
-screenshots/
-videos/
-test-reports/
-
-# Email service temporary files
-uploads/
-attachments/
