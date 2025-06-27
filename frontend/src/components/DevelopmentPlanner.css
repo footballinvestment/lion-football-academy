@@ -1,0 +1,608 @@
+/* Development Planner Component Styles */
+
+.development-planner {
+    padding: 1rem 0;
+}
+
+/* Player Header */
+.player-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 10px;
+    padding: 1.5rem;
+    border: 1px solid #dee2e6;
+}
+
+.player-details .badge {
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Controls Section */
+.controls-section {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid #e9ecef;
+}
+
+/* Plan Cards */
+.plans-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.plan-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.plan-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.plan-header {
+    background: #f8f9fa;
+    padding: 1.25rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: between;
+    align-items: start;
+}
+
+.plan-title h6 {
+    margin-bottom: 0.75rem;
+    color: #495057;
+    font-weight: 600;
+}
+
+.plan-meta {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.plan-meta .badge {
+    font-size: 0.75rem;
+}
+
+.badge.plan-type.individual {
+    background-color: #6f42c1;
+}
+
+.badge.plan-type.technical {
+    background-color: #007bff;
+}
+
+.badge.plan-type.tactical {
+    background-color: #28a745;
+}
+
+.badge.plan-type.physical {
+    background-color: #dc3545;
+}
+
+.badge.plan-type.mental {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge.priority.low {
+    background-color: #6c757d;
+}
+
+.badge.priority.medium {
+    background-color: #17a2b8;
+}
+
+.badge.priority.high {
+    background-color: #fd7e14;
+}
+
+.badge.priority.critical {
+    background-color: #dc3545;
+}
+
+.plan-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.plan-content {
+    padding: 1.25rem;
+}
+
+.plan-goals,
+.plan-objectives,
+.plan-notes {
+    margin-bottom: 1rem;
+}
+
+.plan-goals strong,
+.plan-objectives strong,
+.plan-notes strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #495057;
+    font-size: 0.875rem;
+}
+
+.plan-goals p,
+.plan-objectives p,
+.plan-notes p {
+    margin-bottom: 0;
+    color: #6c757d;
+    line-height: 1.5;
+}
+
+.plan-progress {
+    margin-bottom: 1rem;
+}
+
+.plan-progress .progress {
+    height: 8px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+}
+
+.plan-progress .progress-bar {
+    background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+    border-radius: 4px;
+}
+
+.progress-controls {
+    margin-top: 0.75rem;
+}
+
+.progress-controls .form-label {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.progress-controls .form-range {
+    margin: 0;
+}
+
+.plan-footer {
+    background: #f8f9fa;
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid #e9ecef;
+}
+
+/* Skills Assessment */
+.skills-assessment {
+    padding: 0;
+}
+
+.assessment-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.assessment-header h6 {
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.skill-category {
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+}
+
+.category-header {
+    background: #f8f9fa;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.category-title {
+    margin: 0;
+    color: #495057;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.category-average {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-weight: normal;
+}
+
+.skills-grid {
+    padding: 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.skill-item {
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 1rem;
+    background: #f8f9fa;
+}
+
+.skill-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.skill-label {
+    font-weight: 500;
+    color: #495057;
+    font-size: 0.875rem;
+}
+
+.skill-rating {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.rating-btn {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: #dee2e6;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    line-height: 1;
+}
+
+.rating-btn:hover {
+    color: #ffc107;
+    transform: scale(1.1);
+}
+
+.rating-btn.active {
+    color: #ffc107;
+}
+
+.skill-notes {
+    font-size: 0.875rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    resize: vertical;
+}
+
+.skill-notes::placeholder {
+    color: #adb5bd;
+}
+
+/* Assessment Cards */
+.assessments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.assessment-card {
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    padding: 1.25rem;
+}
+
+.assessment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.assessment-header h6 {
+    margin: 0;
+    color: #495057;
+}
+
+.assessment-meta {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* Progress Overview */
+.progress-overview {
+    padding: 0;
+}
+
+.overview-card {
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    padding: 1.5rem;
+    text-align: center;
+    height: 100%;
+}
+
+.overview-card h6 {
+    color: #6c757d;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+}
+
+.overview-card .stat-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #495057;
+    line-height: 1;
+}
+
+.progress-summary {
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    padding: 1.5rem;
+}
+
+.progress-summary h6 {
+    color: #495057;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.progress-category {
+    margin-bottom: 1rem;
+}
+
+.progress-category:last-child {
+    margin-bottom: 0;
+}
+
+.progress-category .d-flex {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.progress-category .progress {
+    height: 6px;
+    background-color: #e9ecef;
+    border-radius: 3px;
+}
+
+.progress-category .progress-bar {
+    background: linear-gradient(90deg, #007bff 0%, #0056b3 100%);
+    border-radius: 3px;
+}
+
+/* Form Styles */
+.development-plan-form {
+    padding: 0;
+}
+
+.development-plan-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.development-plan-form .form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.development-plan-form .form-control,
+.development-plan-form .form-select {
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.development-plan-form .form-control:focus,
+.development-plan-form .form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+.development-plan-form textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+    margin-top: 1.5rem;
+}
+
+.general-notes {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 1rem;
+    border: 1px solid #e9ecef;
+}
+
+.general-notes .form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.75rem;
+}
+
+/* Empty State */
+.empty-state {
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+.empty-state h5 {
+    margin-bottom: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .plan-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .plan-actions {
+        margin-left: 0;
+        justify-content: flex-start;
+    }
+    
+    .plan-meta {
+        justify-content: flex-start;
+    }
+    
+    .skills-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .skill-header {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+    
+    .assessment-header {
+        flex-direction: column;
+        gap: 0.75rem;
+        text-align: center;
+    }
+    
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+    }
+    
+    .controls-section .row {
+        flex-direction: column;
+    }
+    
+    .controls-section .col-md-4,
+    .controls-section .col-md-3,
+    .controls-section .col-md-2 {
+        margin-bottom: 1rem;
+    }
+    
+    .player-header {
+        text-align: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .skill-rating {
+        justify-content: center;
+    }
+    
+    .rating-btn {
+        font-size: 1rem;
+    }
+    
+    .overview-card .stat-value {
+        font-size: 2rem;
+    }
+    
+    .plan-content {
+        padding: 1rem;
+    }
+    
+    .plan-header {
+        padding: 1rem;
+    }
+    
+    .plan-footer {
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .plan-card,
+    .skill-category,
+    .assessment-card,
+    .overview-card,
+    .progress-summary {
+        background: #212529;
+        border-color: #495057;
+        color: #fff;
+    }
+    
+    .plan-header,
+    .category-header,
+    .plan-footer {
+        background: #343a40;
+        border-color: #6c757d;
+    }
+    
+    .player-header,
+    .controls-section {
+        background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+        border-color: #6c757d;
+    }
+    
+    .skill-item {
+        background: #343a40;
+        border-color: #6c757d;
+    }
+    
+    .general-notes {
+        background: #343a40;
+        border-color: #6c757d;
+    }
+    
+    .plan-title h6,
+    .category-title,
+    .overview-card h6,
+    .progress-summary h6 {
+        color: #fff;
+    }
+    
+    .plan-goals strong,
+    .plan-objectives strong,
+    .plan-notes strong,
+    .skill-label {
+        color: #f8f9fa;
+    }
+    
+    .plan-goals p,
+    .plan-objectives p,
+    .plan-notes p {
+        color: #adb5bd;
+    }
+}
+
+/* Print styles */
+@media print {
+    .plan-actions,
+    .form-actions,
+    .btn,
+    .modal {
+        display: none !important;
+    }
+    
+    .plan-card,
+    .assessment-card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+    
+    .plan-header,
+    .assessment-header {
+        background: #f8f9fa !important;
+    }
+}

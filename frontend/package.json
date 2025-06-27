@@ -1,0 +1,64 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.10.0",
+    "bootstrap": "^5.3.7",
+    "html5-qrcode": "^2.3.8",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.6.2",
+    "react-scripts": "^5.0.1",
+    "web-vitals": "^2.1.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@testing-library/react-hooks": "^8.0.1",
+    "cypress": "^13.6.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "lighthouse": "^11.4.0",
+    "msw": "^2.0.11",
+    "puppeteer": "^21.6.1",
+    "webpack-bundle-analyzer": "^4.10.1"
+  },
+  "proxy": "http://localhost:5001",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "test:coverage": "react-scripts test --coverage --coverageDirectory=coverage",
+    "test:ci": "react-scripts test --coverage --watchAll=false",
+    "test:components": "react-scripts test --testPathPattern=tests/components",
+    "test:integration": "react-scripts test --testPathPattern=tests/integration", 
+    "test:e2e": "cypress run",
+    "test:e2e:open": "cypress open",
+    "test:playwright": "playwright test",
+    "test:performance": "node tests/performance/lighthouse-audit.js",
+    "test:all": "npm run test:ci && npm run test:e2e && npm run test:performance",
+    "analyze-bundle": "npm run build && npx webpack-bundle-analyzer build/static/js/*.js",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

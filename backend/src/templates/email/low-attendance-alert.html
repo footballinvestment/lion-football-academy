@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alacsony Részvételi Riasztás</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #dc3545;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #dc3545;
+            margin: 0;
+            font-size: 28px;
+        }
+        .alert-banner {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .stats-container {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #dc3545;
+            margin: 20px 0;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 8px;
+        }
+        .stat-label {
+            font-weight: bold;
+            color: #495057;
+        }
+        .stat-value {
+            color: #212529;
+        }
+        .absent-players {
+            background-color: #f8d7da;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #f5c6cb;
+            margin: 20px 0;
+        }
+        .recommendations {
+            background-color: #d4edda;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .emoji {
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="emoji">⚠️</div>
+            <h1>{{academy_name}}</h1>
+            <h2>Alacsony Részvételi Riasztás</h2>
+        </div>
+
+        <div class="alert-banner">
+            <h2>Kedves {{coach_name}}!</h2>
+            <p>Figyelmeztetés: Alacsony részvételi arány észlelve!</p>
+        </div>
+
+        <p>Az elmúlt hét során a <strong>{{team_name}}</strong> csapat alacsony részvételi arányt mutat az edzéseken.</p>
+
+        <div class="stats-container">
+            <h3>📊 Heti statisztikák</h3>
+            <div class="stat-row">
+                <span class="stat-label">📅 Időszak:</span>
+                <span class="stat-value">{{week_start}} - {{week_end}}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">🏆 Csapat:</span>
+                <span class="stat-value">{{team_name}}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">👥 Összes játékos:</span>
+                <span class="stat-value">{{total_players}}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">📉 Részvételi arány:</span>
+                <span class="stat-value" style="color: #dc3545; font-weight: bold;">{{attendance_percentage}}%</span>
+            </div>
+        </div>
+
+        <div class="absent-players">
+            <h4>❌ Gyakran hiányzó játékosok:</h4>
+            <p><strong>{{absent_players}}</strong></p>
+            <p><small>Ezek a játékosok több edzést is kihagytak az elmúlt héten.</small></p>
+        </div>
+
+        <div class="recommendations">
+            <h3>💡 Javasolt intézkedések:</h3>
+            <ul>
+                <li><strong>Kapcsolatfelvétel:</strong> Vegye fel a kapcsolatot a hiányzó játékosok szüleivel</li>
+                <li><strong>Motiváció:</strong> Beszéljen a játékosokkal a rendszeres részvétel fontosságáról</li>
+                <li><strong>Rugalmasság:</strong> Vizsgálja meg, hogy van-e akadály az edzéseken való részvételben</li>
+                <li><strong>Csapatszellem:</strong> Szervezzen csapatépítő tevékenységeket</li>
+                <li><strong>Szülői megbeszélés:</strong> Tartson szülői értekezletet a helyzet megbeszéléséhez</li>
+            </ul>
+        </div>
+
+        <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; border: 1px solid #ffeaa7; margin: 20px 0;">
+            <h4>📞 További segítség:</h4>
+            <p>Ha segítségre van szüksége a helyzet kezeléséhez, kérjük, vegye fel a kapcsolatot az akadémia vezetőségével. Közösen megtaláljuk a megoldást!</p>
+        </div>
+
+        <p>Köszönjük edzői munkáját és elkötelezettségét!</p>
+
+        <div class="footer">
+            <p><strong>{{academy_name}} Vezetőség</strong></p>
+            <p>Ez egy automatikus riasztás. Válaszaival segítsen a helyzet javításában!</p>
+            <p>🏆 Együtt a sikerért! ⚽</p>
+        </div>
+    </div>
+</body>
+</html>
