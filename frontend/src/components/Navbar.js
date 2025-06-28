@@ -140,7 +140,9 @@ const Navbar = () => {
                                     Üdvözöljük, {user?.full_name || user?.username}!
                                     <small className="d-block text-light opacity-75">
                                         {user?.role === 'admin' ? 'Adminisztrátor' : 
-                                         user?.role === 'coach' ? 'Edző' : 'Szülő'}
+                                         user?.role === 'coach' ? 'Edző' : 
+                                         user?.role === 'parent' ? 'Szülő' :
+                                         user?.role === 'player' ? 'Játékos' : 'Felhasználó'}
                                     </small>
                                 </span>
                                 <button 

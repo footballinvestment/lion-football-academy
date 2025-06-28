@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 import ErrorBoundary from '../components/ErrorBoundary';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ResponsiveTable, { createPlayerTableConfig } from '../components/ResponsiveTable';
@@ -8,6 +9,7 @@ import PlayerModal from '../components/PlayerModal';
 import { handleApiError, ErrorAlert, ConfirmationModal } from '../utils/errorHandler';
 
 const Players = () => {
+    const { user, canViewAllPlayers } = useContext(AuthContext);
     const [players, setPlayers] = useState([]);
     const [teams, setTeams] = useState([]);
     const [showModal, setShowModal] = useState(false);
@@ -21,6 +23,14 @@ const Players = () => {
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
+            
+            // Check permissions before making API calls
+            if (!canViewAllPlayers()) {
+                setError('Nincs jogosultsága az összes játékos megtekintéséhez. Ez az oldal csak adminisztrátorok és edzők számára elérhető.');
+                setLoading(false);
+                return;
+            }
+            
             const [playersRes, teamsRes] = await Promise.all([
                 apiService.players.getAll(),
                 apiService.teams.getAll()
@@ -35,7 +45,7 @@ const Players = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [canViewAllPlayers]);
 
     useEffect(() => {
         fetchData();

@@ -4,6 +4,8 @@ import apiService from '../services/api';
 
 const Dashboard = () => {
     const { user } = useContext(AuthContext);
+    // userType is equivalent to user?.role for clarity
+    const userType = user?.role;
     const [stats, setStats] = useState({
         totalPlayers: 0,
         totalTeams: 0,
@@ -24,46 +26,143 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
         try {
             setLoading(true);
+            console.log('Dashboard - User:', user, 'UserType:', userType);
             
-            if (user?.role === 'parent') {
-                // Parent-specific dashboard data
-                const [childrenRes, statisticsRes, trainingsRes, announcementsRes] = await Promise.all([
-                    apiService.parents.getChildren(user.id),
-                    apiService.parents.getStatistics(user.id),
-                    apiService.trainings.getUpcoming({ limit: 5 }),
-                    apiService.announcements.getAll({ limit: 5 })
+            if (userType === 'parent') {
+                // Parent-specific dashboard data with graceful error handling
+                const [childrenRes, statisticsRes, trainingsRes, announcementsRes] = await Promise.allSettled([
+                    apiService.parents.getChildren(user.id).catch(err => {
+                        if (err.response?.status === 403) {
+                            console.info('Dashboard - No access to children data');
+                            return { data: { children: [], childCount: 0 } };
+                        }
+                        throw err;
+                    }),
+                    apiService.parents.getStatistics(user.id).catch(err => {
+                        if (err.response?.status === 403) {
+                            console.info('Dashboard - No access to parent statistics');
+                            return { data: { statistics: { teamsInvolved: 0 } } };
+                        }
+                        throw err;
+                    }),
+                    apiService.trainings.getUpcoming({ limit: 5 }).catch(err => {
+                        if (err.response?.status === 403) {
+                            console.info('Dashboard - No access to trainings');
+                            return { data: [] };
+                        }
+                        throw err;
+                    }),
+                    apiService.announcements.getAll({ limit: 5 }).catch(err => {
+                        if (err.response?.status === 403) {
+                            console.info('Dashboard - No access to announcements');
+                            return { data: [] };
+                        }
+                        throw err;
+                    })
                 ]);
+                
+                const childrenData = childrenRes.status === 'fulfilled' ? childrenRes.value?.data : { children: [], childCount: 0 };
+                const statisticsData = statisticsRes.status === 'fulfilled' ? statisticsRes.value?.data : { statistics: { teamsInvolved: 0 } };
+                const trainingsData = trainingsRes.status === 'fulfilled' ? trainingsRes.value?.data : [];
+                const announcementsData = announcementsRes.status === 'fulfilled' ? announcementsRes.value?.data : [];
                 
                 setParentData({
-                    children: childrenRes.data.children || [],
-                    statistics: statisticsRes.data.statistics || null
+                    children: childrenData.children || [],
+                    statistics: statisticsData.statistics || null
                 });
                 
                 setStats({
-                    totalPlayers: childrenRes.data.childCount || 0,
-                    totalTeams: statisticsRes.data.statistics?.teamsInvolved || 0,
-                    upcomingTrainings: trainingsRes.data || [],
-                    recentAnnouncements: announcementsRes.data || []
+                    totalPlayers: childrenData.childCount || 0,
+                    totalTeams: statisticsData.statistics?.teamsInvolved || 0,
+                    upcomingTrainings: trainingsData || [],
+                    recentAnnouncements: announcementsData || []
                 });
-            } else {
-                // General dashboard data for admin/coach
-                const [playersRes, teamsRes, trainingsRes, announcementsRes] = await Promise.all([
-                    apiService.players.getAll(),
-                    apiService.teams.getAll(),
-                    apiService.trainings.getUpcoming({ limit: 5 }),
-                    apiService.announcements.getAll({ limit: 5 })
+            } else if (userType === 'admin' || userType === 'coach') {
+                // General dashboard data for admin/coach with graceful error handling
+                const [playersRes, teamsRes, trainingsRes, announcementsRes] = await Promise.allSettled([
+                    apiService.players.getAll().catch(err => {
+                        if (err.response?.status === 403) {
+                            console.info('Dashboard - No access to players data');
+                            return { data: [] };
+                        }
+                        throw err;
+                    }),
+                    apiService.teams.getAll().catch(err => {
+                        if (err.response?.status === 403) {
+                            console.info('Dashboard - No access to teams data');
+                            return { data: [] };
+                        }
+                        throw err;
+                    }),
+                    apiService.trainings.getUpcoming({ limit: 5 }).catch(err => {
+                        if (err.response?.status === 403) {
+                            console.info('Dashboard - No access to trainings');
+                            return { data: [] };
+                        }
+                        throw err;
+                    }),
+                    apiService.announcements.getAll({ limit: 5 }).catch(err => {
+                        if (err.response?.status === 403) {
+                            console.info('Dashboard - No access to announcements');
+                            return { data: [] };
+                        }
+                        throw err;
+                    })
                 ]);
                 
+                const playersData = playersRes.status === 'fulfilled' ? playersRes.value?.data : [];
+                const teamsData = teamsRes.status === 'fulfilled' ? teamsRes.value?.data : [];
+                const trainingsData = trainingsRes.status === 'fulfilled' ? trainingsRes.value?.data : [];
+                const announcementsData = announcementsRes.status === 'fulfilled' ? announcementsRes.value?.data : [];
+                
                 setStats({
-                    totalPlayers: playersRes.data.length,
-                    totalTeams: teamsRes.data.length,
-                    upcomingTrainings: trainingsRes.data || [],
-                    recentAnnouncements: announcementsRes.data || []
+                    totalPlayers: playersData.length || 0,
+                    totalTeams: teamsData.length || 0,
+                    upcomingTrainings: trainingsData || [],
+                    recentAnnouncements: announcementsData || []
+                });
+            } else {
+                // Player role or other roles - limited dashboard data with graceful error handling
+                const [trainingsRes, announcementsRes] = await Promise.allSettled([
+                    apiService.trainings.getUpcoming({ limit: 5 }).catch(err => {
+                        if (err.response?.status === 403) {
+                            console.info('Dashboard - No access to trainings');
+                            return { data: [] };
+                        }
+                        throw err;
+                    }),
+                    apiService.announcements.getAll({ limit: 5 }).catch(err => {
+                        if (err.response?.status === 403) {
+                            console.info('Dashboard - No access to announcements');
+                            return { data: [] };
+                        }
+                        throw err;
+                    })
+                ]);
+                
+                const trainingsData = trainingsRes.status === 'fulfilled' ? trainingsRes.value?.data : [];
+                const announcementsData = announcementsRes.status === 'fulfilled' ? announcementsRes.value?.data : [];
+                
+                setStats({
+                    totalPlayers: 1, // Show only self
+                    totalTeams: user?.team_id ? 1 : 0,
+                    upcomingTrainings: trainingsData || [],
+                    recentAnnouncements: announcementsData || []
                 });
             }
         } catch (error) {
-            console.error('Hiba a dashboard adatok betöltésénél:', error);
-            setError('Hiba történt az adatok betöltése során');
+            console.log('Dashboard - Error details:', error.response?.status, error.response?.data);
+            
+            // Handle 403 Forbidden errors gracefully
+            if (error.response?.status === 403) {
+                console.info('Dashboard - Access denied to some resources due to user permissions');
+                // Don't set error state for permission issues, just log and continue
+                // This allows the dashboard to show what the user CAN access
+                setError(null);
+            } else {
+                console.error('Dashboard - Unexpected error loading data:', error);
+                setError('Hiba történt az adatok betöltése során');
+            }
         } finally {
             setLoading(false);
         }
@@ -91,30 +190,36 @@ const Dashboard = () => {
         <div>
             <h1 className="mb-4">
                 📊 Dashboard
-                {user?.role === 'parent' && (
+                {userType === 'parent' && (
                     <span className="badge bg-info ms-2">Szülői Nézet</span>
+                )}
+                {userType === 'player' && (
+                    <span className="badge bg-success ms-2">Játékos Nézet</span>
                 )}
             </h1>
             
             {/* Statisztika kártyák */}
             <div className="row mb-4">
-                <div className="col-md-3 mb-3">
-                    <div className="card bg-info text-white h-100">
-                        <div className="card-body text-center">
-                            <h2 className="card-title">{stats.totalPlayers}</h2>
-                            <p className="card-text">
-                                {user?.role === 'parent' ? 'Gyermekeim' : 'Összes Játékos'}
-                            </p>
+                {/* Játékos statisztika - csak admin/coach/parent esetén */}
+                {(userType === 'admin' || userType === 'coach' || userType === 'parent') && (
+                    <div className="col-md-3 mb-3">
+                        <div className="card bg-info text-white h-100">
+                            <div className="card-body text-center">
+                                <h2 className="card-title">{stats.totalPlayers}</h2>
+                                <p className="card-text">
+                                    {userType === 'parent' ? 'Gyermekeim' : 'Összes Játékos'}
+                                </p>
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
                 
                 <div className="col-md-3 mb-3">
                     <div className="card bg-success text-white h-100">
                         <div className="card-body text-center">
                             <h2 className="card-title">{stats.totalTeams}</h2>
                             <p className="card-text">
-                                {user?.role === 'parent' ? 'Érintett Csapatok' : 'Összes Csapat'}
+                                {userType === 'parent' ? 'Érintett Csapatok' : 'Összes Csapat'}
                             </p>
                         </div>
                     </div>
@@ -140,7 +245,7 @@ const Dashboard = () => {
             </div>
 
             {/* Parent-specific MyChildren section */}
-            {user?.role === 'parent' && (
+            {userType === 'parent' && (
                 <div className="row mb-4">
                     <div className="col-12">
                         <div className="card">
@@ -191,6 +296,48 @@ const Dashboard = () => {
                                                 </div>
                                             </div>
                                         ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Player-specific section */}
+            {userType === 'player' && (
+                <div className="row mb-4">
+                    <div className="col-12">
+                        <div className="card">
+                            <div className="card-header">
+                                <h5 className="card-title mb-0">⚽ Játékos Dashboard</h5>
+                            </div>
+                            <div className="card-body">
+                                <div className="alert alert-info">
+                                    <h6>👋 Üdvözöljük, {user?.full_name}!</h6>
+                                    <p className="mb-0">
+                                        Itt tekintheti meg az edzéseket, híreket és saját statisztikáit.
+                                        A részletes játékos funkciók hamarosan elérhetők lesznek.
+                                    </p>
+                                </div>
+                                {user?.team_id && (
+                                    <div className="row">
+                                        <div className="col-md-6">
+                                            <div className="card bg-light">
+                                                <div className="card-body text-center">
+                                                    <h6 className="card-title">🏆 Csapatom</h6>
+                                                    <p className="card-text">Csapat ID: {user.team_id}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <div className="card bg-light">
+                                                <div className="card-body text-center">
+                                                    <h6 className="card-title">📊 Státusz</h6>
+                                                    <p className="card-text">Aktív játékos</p>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </div>

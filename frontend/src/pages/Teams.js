@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 import ErrorBoundary from '../components/ErrorBoundary';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ResponsiveTable, { createTeamTableConfig } from '../components/ResponsiveTable';
 import apiService from '../services/api';
 
 const Teams = () => {
+    const { user, canAccessFeature } = useContext(AuthContext);
     const [teams, setTeams] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -12,6 +14,14 @@ const Teams = () => {
     const fetchTeams = useCallback(async () => {
         try {
             setLoading(true);
+            
+            // Check permissions before making API calls
+            if (!canAccessFeature('all-teams')) {
+                setError('Nincs jogosultsága az összes csapat megtekintéséhez. Ez az oldal csak adminisztrátorok és edzők számára elérhető.');
+                setLoading(false);
+                return;
+            }
+            
             const response = await apiService.teams.getAll();
             setTeams(response.data);
         } catch (error) {
@@ -20,7 +30,7 @@ const Teams = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [canAccessFeature]);
 
     useEffect(() => {
         fetchTeams();

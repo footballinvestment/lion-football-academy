@@ -124,7 +124,7 @@ function App() {
               } />
               
               <Route path="/matches" element={
-                <ProtectedRoute requireRoles={['admin', 'coach', 'parent']}>
+                <ProtectedRoute requireRoles={['admin', 'coach', 'parent', 'player']}>
                   <Matches />
                 </ProtectedRoute>
               } />
@@ -136,7 +136,7 @@ function App() {
               } />
               
               <Route path="/billing" element={
-                <ProtectedRoute requireRoles={['admin', 'coach', 'parent']}>
+                <ProtectedRoute requireRoles={['admin', 'coach', 'parent', 'player']}>
                   <Billing />
                 </ProtectedRoute>
               } />

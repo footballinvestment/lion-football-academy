@@ -143,6 +143,10 @@ export const AuthProvider = ({ children }) => {
         return user && user.role === 'parent';
     };
 
+    const isPlayer = () => {
+        return user && user.role === 'player';
+    };
+
     const isAdminOrCoach = () => {
         return user && (user.role === 'admin' || user.role === 'coach');
     };
@@ -223,6 +227,7 @@ export const AuthProvider = ({ children }) => {
         isAdmin: () => user?.role === 'admin',
         isCoach: () => user?.role === 'coach',
         isParent: () => user?.role === 'parent',
+        isPlayer: () => user?.role === 'player',
         isAdminOrCoach: () => user && (user.role === 'admin' || user.role === 'coach'),
         
         // Permission functions

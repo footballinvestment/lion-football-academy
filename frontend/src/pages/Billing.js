@@ -4,10 +4,13 @@ import apiService from '../services/api';
 
 const Billing = () => {
     const { user, isAdminOrCoach, isAdmin } = useContext(AuthContext);
+    
+    // DEBUG LOG
+    console.log('Billing page - User role:', user?.role, 'User:', user, 'Access granted:', true);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const [activeTab, setActiveTab] = useState('subscriptions');
+    const [activeTab, setActiveTab] = useState(user?.role === 'player' ? 'invoices' : 'subscriptions');
     
     // Data states
     const [subscriptions, setSubscriptions] = useState([]);
@@ -95,34 +98,51 @@ const Billing = () => {
         try {
             setLoading(true);
             
-            const [
-                subscriptionsData,
-                invoicesData,
-                plansData,
-                playersData
-            ] = await Promise.all([
-                apiService.get('/billing/subscriptions'),
-                apiService.get('/billing/invoices'),
-                apiService.get('/billing/plans'),
-                apiService.get('/players')
-            ]);
-            
-            setSubscriptions(subscriptionsData.data);
-            setInvoices(invoicesData.data);
-            setPlans(plansData.data);
-            setPlayers(playersData.data);
+            // Admin és coach esetén minden adat kell
+            if (user.role === 'admin' || user.role === 'coach') {
+                const [
+                    subscriptionsData,
+                    invoicesData,
+                    plansData,
+                    playersData
+                ] = await Promise.all([
+                    apiService.billing.getSubscriptions(),
+                    apiService.billing.getInvoices(),
+                    apiService.billing.getPlans(),
+                    apiService.players.getAll()
+                ]);
+                
+                setSubscriptions(subscriptionsData.data);
+                setInvoices(invoicesData.data);
+                setPlans(plansData.data);
+                setPlayers(playersData.data);
+            } else {
+                // Player és parent esetén csak saját pénzügyi adatok
+                const [
+                    invoicesData,
+                    plansData
+                ] = await Promise.all([
+                    apiService.billing.getInvoices(), // Csak saját számlák
+                    apiService.billing.getPlans()     // Publikus csomagok
+                ]);
+                
+                setInvoices(invoicesData.data);
+                setPlans(plansData.data);
+                setSubscriptions([]); // Player nem látja az összes előfizetést
+                setPlayers([]);       // Player nem fér hozzá a játékos listához
+            }
             
             if (activeTab === 'reports' && isAdminOrCoach()) {
                 await fetchReports();
             }
             
             if (activeTab === 'payments' && isAdminOrCoach()) {
-                const paymentsData = await apiService.get('/billing/payments');
+                const paymentsData = await apiService.billing.getPayments();
                 setPayments(paymentsData.data);
             }
             
             if (activeTab === 'scholarships' && isAdminOrCoach()) {
-                const scholarshipsData = await apiService.get('/billing/scholarships');
+                const scholarshipsData = await apiService.billing.getScholarships();
                 setScholarships(scholarshipsData.data);
             }
             
@@ -141,9 +161,9 @@ const Billing = () => {
                 summaryData,
                 revenueData
             ] = await Promise.all([
-                apiService.get('/billing/reports/outstanding'),
-                apiService.get('/billing/reports/summary'),
-                apiService.get('/billing/reports/revenue')
+                apiService.billing.getOutstandingInvoices(),
+                apiService.billing.getFinancialSummary(),
+                apiService.billing.getMonthlyRevenue()
             ]);
             
             setOutstandingInvoices(outstandingData.data);
@@ -157,7 +177,7 @@ const Billing = () => {
     const handleCreateSubscription = async (e) => {
         e.preventDefault();
         try {
-            await apiService.post('/billing/subscriptions', subscriptionForm);
+            await apiService.billing.createSubscription(subscriptionForm);
             setShowModal(false);
             resetSubscriptionForm();
             fetchData();
@@ -170,7 +190,7 @@ const Billing = () => {
     const handleCreateInvoice = async (e) => {
         e.preventDefault();
         try {
-            await apiService.post('/billing/invoices', invoiceForm);
+            await apiService.billing.createInvoice(invoiceForm);
             setShowModal(false);
             resetInvoiceForm();
             fetchData();
@@ -183,7 +203,7 @@ const Billing = () => {
     const handleRecordPayment = async (e) => {
         e.preventDefault();
         try {
-            await apiService.post('/billing/payments', paymentForm);
+            await apiService.billing.recordPayment(paymentForm);
             setShowModal(false);
             resetPaymentForm();
             fetchData();
@@ -196,7 +216,7 @@ const Billing = () => {
     const handleCreateScholarship = async (e) => {
         e.preventDefault();
         try {
-            await apiService.post('/billing/scholarships', scholarshipForm);
+            await apiService.billing.createScholarship(scholarshipForm);
             setShowModal(false);
             resetScholarshipForm();
             fetchData();
@@ -305,7 +325,7 @@ const Billing = () => {
             <div className="row">
                 <div className="col-12">
                     <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h2>💰 Pénzügyi Kezelés & Számlázás</h2>
+                        <h2>💰 {user.role === 'player' ? 'Saját Pénzügyek' : 'Pénzügyi Kezelés & Számlázás'}</h2>
                         {isAdminOrCoach() && (
                             <div className="btn-group">
                                 <button 
@@ -338,14 +358,16 @@ const Billing = () => {
 
                     {/* Tabs */}
                     <ul className="nav nav-tabs mb-4">
-                        <li className="nav-item">
-                            <button 
-                                className={`nav-link ${activeTab === 'subscriptions' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('subscriptions')}
-                            >
-                                📋 Előfizetések
-                            </button>
-                        </li>
+                        {(user.role === 'admin' || user.role === 'coach') && (
+                            <li className="nav-item">
+                                <button 
+                                    className={`nav-link ${activeTab === 'subscriptions' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('subscriptions')}
+                                >
+                                    📋 Előfizetések
+                                </button>
+                            </li>
+                        )}
                         <li className="nav-item">
                             <button 
                                 className={`nav-link ${activeTab === 'invoices' ? 'active' : ''}`}

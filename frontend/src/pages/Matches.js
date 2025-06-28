@@ -4,6 +4,9 @@ import apiService from '../services/api';
 
 const Matches = () => {
     const { user, isAdminOrCoach } = useContext(AuthContext);
+    
+    // DEBUG LOG
+    console.log('Matches page - User role:', user?.role, 'User:', user, 'Access granted:', true);
     const [matches, setMatches] = useState([]);
     const [teams, setTeams] = useState([]);
     const [players, setPlayers] = useState([]);
@@ -95,23 +98,46 @@ const Matches = () => {
     ];
 
     useEffect(() => {
-        if (isAdminOrCoach()) {
+        if (user) {
             fetchData();
         }
-    }, [isAdminOrCoach, filters]);
+    }, [user, filters]);
 
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [matchesData, teamsData, playersData] = await Promise.all([
-                apiService.matches.getAll(filters),
-                apiService.teams.getAll(),
-                apiService.players.getAll()
-            ]);
             
-            setMatches(matchesData.data);
-            setTeams(teamsData.data);
-            setPlayers(playersData.data);
+            // Admin és coach esetén minden adat kell
+            if (user.role === 'admin' || user.role === 'coach') {
+                const [matchesData, teamsData, playersData] = await Promise.all([
+                    apiService.matches.getAll(filters),
+                    apiService.teams.getAll(),
+                    apiService.players.getAll()
+                ]);
+                
+                setMatches(matchesData.data);
+                setTeams(teamsData.data);
+                setPlayers(playersData.data);
+            } else {
+                // Player és parent esetén csak matches és teams
+                const [matchesData, teamsData] = await Promise.all([
+                    apiService.matches.getAll(filters),
+                    apiService.teams.getAll()
+                ]);
+                
+                let matchesToShow = matchesData.data;
+                
+                // Player role csak a saját csapat mérkőzéseit látja
+                if (user.role === 'player' && user.team_id) {
+                    matchesToShow = matchesData.data.filter(match => 
+                        match.home_team_id === user.team_id || match.away_team_id === user.team_id
+                    );
+                }
+                
+                setMatches(matchesToShow);
+                setTeams(teamsData.data);
+                setPlayers([]); // Player role nem fér hozzá a játékos listához
+            }
             
             if (activeTab === 'statistics') {
                 await fetchStatistics();
@@ -287,11 +313,11 @@ const Matches = () => {
         return player ? player.name : 'Ismeretlen játékos';
     };
 
-    if (!isAdminOrCoach()) {
+    if (!user) {
         return (
             <div className="container mt-4">
                 <div className="alert alert-warning">
-                    Nincs jogosultsága a mérkőzések kezeléséhez.
+                    Bejelentkezés szükséges a mérkőzések megtekintéséhez.
                 </div>
             </div>
         );
@@ -304,7 +330,7 @@ const Matches = () => {
             <div className="row">
                 <div className="col-12">
                     <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h2>⚽ Mérkőzések & Statisztikák</h2>
+                        <h2>⚽ Mérkőzések {user.role === 'player' ? '- Saját Csapat' : '& Statisztikák'}</h2>
                         {isAdminOrCoach() && (
                             <button 
                                 className="btn btn-primary"
@@ -337,14 +363,16 @@ const Matches = () => {
                                 📅 Mérkőzések
                             </button>
                         </li>
-                        <li className="nav-item">
-                            <button 
-                                className={`nav-link ${activeTab === 'statistics' ? 'active' : ''}`}
-                                onClick={() => {setActiveTab('statistics'); fetchStatistics();}}
-                            >
-                                📊 Statisztikák
-                            </button>
-                        </li>
+                        {isAdminOrCoach() && (
+                            <li className="nav-item">
+                                <button 
+                                    className={`nav-link ${activeTab === 'statistics' ? 'active' : ''}`}
+                                    onClick={() => {setActiveTab('statistics'); fetchStatistics();}}
+                                >
+                                    📊 Statisztikák
+                                </button>
+                            </li>
+                        )}
                     </ul>
 
                     {/* Matches Tab */}
@@ -490,29 +518,33 @@ const Matches = () => {
                                                                 <small>{match.venue || '-'}</small>
                                                             </td>
                                                             <td>
-                                                                <div className="btn-group btn-group-sm">
-                                                                    <button 
-                                                                        className="btn btn-outline-success"
-                                                                        onClick={() => openModal('score', match)}
-                                                                        title="Eredmény"
-                                                                    >
-                                                                        🏆
-                                                                    </button>
-                                                                    <button 
-                                                                        className="btn btn-outline-primary"
-                                                                        onClick={() => openModal('performance', match)}
-                                                                        title="Teljesítmény"
-                                                                    >
-                                                                        📊
-                                                                    </button>
-                                                                    <button 
-                                                                        className="btn btn-outline-warning"
-                                                                        onClick={() => openModal('event', match)}
-                                                                        title="Esemény"
-                                                                    >
-                                                                        ⚽
-                                                                    </button>
-                                                                </div>
+                                                                {isAdminOrCoach() ? (
+                                                                    <div className="btn-group btn-group-sm">
+                                                                        <button 
+                                                                            className="btn btn-outline-success"
+                                                                            onClick={() => openModal('score', match)}
+                                                                            title="Eredmény"
+                                                                        >
+                                                                            🏆
+                                                                        </button>
+                                                                        <button 
+                                                                            className="btn btn-outline-primary"
+                                                                            onClick={() => openModal('performance', match)}
+                                                                            title="Teljesítmény"
+                                                                        >
+                                                                            📊
+                                                                        </button>
+                                                                        <button 
+                                                                            className="btn btn-outline-warning"
+                                                                            onClick={() => openModal('event', match)}
+                                                                            title="Esemény"
+                                                                        >
+                                                                            ⚽
+                                                                        </button>
+                                                                    </div>
+                                                                ) : (
+                                                                    <small className="text-muted">Csak megtekintés</small>
+                                                                )}
                                                             </td>
                                                         </tr>
                                                     ))}
