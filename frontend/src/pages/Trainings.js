@@ -1,12 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import apiService from '../services/api';
 
 const Trainings = () => {
     const navigate = useNavigate();
+    const { user, isAdminOrCoach } = useContext(AuthContext);
     const [trainings, setTrainings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    
+    // DEBUG LOG
+    console.log('Trainings page - User role:', user?.role, 'isAdminOrCoach:', isAdminOrCoach());
 
     useEffect(() => {
         fetchTrainings();
@@ -73,10 +78,12 @@ const Trainings = () => {
     return (
         <div>
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h1>🏃 Edzések Kezelése</h1>
-                <button className="btn btn-primary">
-                    ➕ Új Edzés
-                </button>
+                <h1>🏃 {user?.role === 'player' ? 'Edzések' : 'Edzések Kezelése'}</h1>
+                {isAdminOrCoach() && (
+                    <button className="btn btn-primary">
+                        ➕ Új Edzés
+                    </button>
+                )}
             </div>
 
             {/* Közelgő edzések */}
@@ -86,7 +93,12 @@ const Trainings = () => {
                 {upcomingTrainings.length === 0 ? (
                     <div className="alert alert-info">
                         <strong>📋 Nincsenek közelgő edzések</strong>
-                        <p className="mb-0">Új edzések létrehozásához használd a "Új Edzés" gombot.</p>
+                        <p className="mb-0">
+                            {isAdminOrCoach() 
+                                ? 'Új edzések létrehozásához használd a "Új Edzés" gombot.' 
+                                : 'Jelenleg nincsenek tervezett edzések.'
+                            }
+                        </p>
                     </div>
                 ) : (
                     <div className="row">
@@ -129,9 +141,11 @@ const Trainings = () => {
                                             >
                                                 📱 QR Check-in
                                             </button>
-                                            <button className="btn btn-outline-primary btn-sm">
-                                                ✏️ Szerkesztés
-                                            </button>
+                                            {isAdminOrCoach() && (
+                                                <button className="btn btn-outline-primary btn-sm">
+                                                    ✏️ Szerkesztés
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -191,9 +205,11 @@ const Trainings = () => {
                                             >
                                                 📱 QR Megtekintés
                                             </button>
-                                            <button className="btn btn-outline-secondary btn-sm">
-                                                📋 Részletek
-                                            </button>
+                                            {isAdminOrCoach() && (
+                                                <button className="btn btn-outline-secondary btn-sm">
+                                                    📋 Részletek
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
