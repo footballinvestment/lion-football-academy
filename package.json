@@ -1,0 +1,100 @@
+{
+  "name": "lion-football-academy",
+  "version": "1.0.0",
+  "description": "Complete football academy management system with role-based access control, player development tracking, and family engagement features",
+  "main": "backend/server.js",
+  "keywords": [
+    "football",
+    "academy",
+    "management",
+    "sports",
+    "youth-sports",
+    "player-development",
+    "team-management",
+    "react",
+    "nodejs",
+    "express",
+    "sqlite",
+    "authentication",
+    "role-based-access",
+    "qr-code",
+    "performance-tracking",
+    "family-portal",
+    "coach-management",
+    "training-management",
+    "match-statistics",
+    "responsive-design",
+    "production-ready"
+  ],
+  "author": {
+    "name": "Lion Football Academy Development Team",
+    "email": "dev@lionfootballacademy.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/lion-football-academy.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/lion-football-academy/issues"
+  },
+  "homepage": "https://github.com/your-org/lion-football-academy#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "start": "cd backend && npm start",
+    "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm start\"",
+    "build": "cd frontend && npm run build",
+    "test": "cd backend && npm test && cd ../frontend && npm test",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "test:e2e": "cd frontend && npm run test:e2e",
+    "lint": "cd backend && npm run lint && cd ../frontend && npm run lint",
+    "lint:fix": "cd backend && npm run lint:fix && cd ../frontend && npm run lint:fix",
+    "setup": "npm run setup:backend && npm run setup:frontend",
+    "setup:backend": "cd backend && npm install",
+    "setup:frontend": "cd frontend && npm install",
+    "setup:complete": "npm run setup && cd backend && npm run db:create && npm run db:migrate && npm run create:admin",
+    "db:create": "cd backend && npm run db:create",
+    "db:migrate": "cd backend && npm run db:migrate",
+    "db:seed": "cd backend && npm run db:seed",
+    "db:backup": "cd backend && npm run db:backup",
+    "create:admin": "cd backend && npm run create:admin",
+    "deploy:build": "npm run build && npm run test",
+    "deploy:check": "npm run lint && npm run test && npm run build",
+    "health:check": "curl -f http://localhost:5001/health || exit 1",
+    "logs": "cd backend && npm run logs",
+    "clean": "rm -rf node_modules backend/node_modules frontend/node_modules",
+    "reinstall": "npm run clean && npm install && npm run setup"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "private": true,
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/your-org"
+  },
+  "contributors": [
+    {
+      "name": "Claude Code",
+      "email": "noreply@anthropic.com",
+      "role": "Lead Developer (AI Assistant)"
+    }
+  ],
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}
