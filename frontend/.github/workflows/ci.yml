@@ -1,0 +1,500 @@
+name: Continuous Integration - Lion Football Academy
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '18.x'
+  CACHE_KEY: 'node-modules-cache-v1'
+
+jobs:
+  # Job 1: Install dependencies and cache
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      cache-hit: ${{ steps.cache.outputs.cache-hit }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Cache node modules
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ env.CACHE_KEY }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ env.CACHE_KEY }}-
+
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+  # Job 2: Lint and type checking
+  lint:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ env.CACHE_KEY }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Check TypeScript (if applicable)
+        run: |
+          if [ -f "tsconfig.json" ]; then
+            npm run type-check
+          else
+            echo "No TypeScript configuration found, skipping type check"
+          fi
+
+  # Job 3: Unit and Integration Tests
+  test:
+    runs-on: ubuntu-latest
+    needs: setup
+    strategy:
+      matrix:
+        test-type: [unit, integration]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ env.CACHE_KEY }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Run ${{ matrix.test-type }} tests
+        run: npm run test:${{ matrix.test-type }}
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-results-${{ matrix.test-type }}
+          path: |
+            coverage/
+            test-reports/
+            junit-results.xml
+
+      - name: Upload coverage to Codecov
+        if: matrix.test-type == 'unit'
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+
+  # Job 4: Build Application
+  build:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ env.CACHE_KEY }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Build application
+        run: npm run build
+        env:
+          CI: true
+          REACT_APP_API_URL: ${{ secrets.API_URL || 'http://localhost:5001' }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-files
+          path: build/
+          retention-days: 7
+
+  # Job 5: Performance Testing
+  performance:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ env.CACHE_KEY }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-files
+          path: build/
+
+      - name: Install Chrome
+        run: |
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Run performance tests
+        run: npm run test:performance
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
+
+      - name: Upload performance reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: performance-reports
+          path: |
+            test-reports/performance-audit.html
+            test-reports/bundle-analysis.html
+            build/bundle-report.html
+
+  # Job 6: End-to-End Tests
+  e2e:
+    runs-on: ubuntu-latest
+    needs: [build]
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ env.CACHE_KEY }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-files
+          path: build/
+
+      - name: Install Playwright browsers
+        run: npx playwright install ${{ matrix.browser }}
+
+      - name: Start backend server
+        run: |
+          cd ../backend
+          npm ci
+          npm start &
+          sleep 10  # Wait for server to start
+        env:
+          NODE_ENV: test
+          PORT: 5001
+
+      - name: Start frontend server
+        run: |
+          npx serve -s build -l 3000 &
+          sleep 5  # Wait for server to start
+
+      - name: Run E2E tests
+        run: npx playwright test --project=${{ matrix.browser }}
+        env:
+          BASE_URL: http://localhost:3000
+
+      - name: Upload E2E results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: e2e-results-${{ matrix.browser }}
+          path: |
+            test-results/
+            playwright-report/
+
+  # Job 7: Security Scan
+  security:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ env.CACHE_KEY }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+  # Job 8: Accessibility Testing
+  accessibility:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ env.CACHE_KEY }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-files
+          path: build/
+
+      - name: Start server
+        run: |
+          npx serve -s build -l 3000 &
+          sleep 5
+
+      - name: Run accessibility tests
+        run: |
+          npx pa11y-ci --sitemap http://localhost:3000/sitemap.xml || true
+          npx axe-cli http://localhost:3000 --include-tags wcag2a,wcag2aa
+
+      - name: Upload accessibility reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: accessibility-reports
+          path: |
+            pa11y-results.json
+            axe-results.json
+
+  # Job 9: Comprehensive Test Runner
+  comprehensive-tests:
+    runs-on: ubuntu-latest
+    needs: [lint, test, build]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ env.CACHE_KEY }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-files
+          path: build/
+
+      - name: Install Chrome
+        run: |
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Start backend server
+        run: |
+          cd ../backend
+          npm ci
+          npm start &
+          sleep 10
+        env:
+          NODE_ENV: test
+
+      - name: Run comprehensive test suite
+        run: node test-runner.js --environment ci --no-parallel
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
+
+      - name: Upload comprehensive test report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: comprehensive-test-report
+          path: test-reports/
+
+      - name: Comment PR with test results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const path = './test-reports/test-results.json';
+            
+            if (fs.existsSync(path)) {
+              const results = JSON.parse(fs.readFileSync(path, 'utf8'));
+              
+              const comment = `
+              ## 🧪 Test Results
+              
+              **Overall Status:** ${results.summary.failed === 0 ? '✅ PASSED' : '❌ FAILED'}
+              
+              **Summary:**
+              - Total Tests: ${results.summary.total}
+              - Passed: ${results.summary.passed}
+              - Failed: ${results.summary.failed}
+              - Duration: ${Math.round(results.summary.duration / 1000)}s
+              
+              **Phase Results:**
+              ${Object.entries(results.phases).map(([phase, result]) => 
+                `- ${result.passed ? '✅' : '❌'} ${phase}: ${result.passed ? 'PASSED' : 'FAILED'}`
+              ).join('\n')}
+              
+              ${results.coverage ? `
+              **Coverage:**
+              - Lines: ${results.coverage.lines}%
+              - Functions: ${results.coverage.functions}%
+              - Branches: ${results.coverage.branches}%
+              ` : ''}
+              
+              📊 [Full Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+              `;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+
+  # Job 10: Deploy to staging (if tests pass)
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: [comprehensive-tests]
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-files
+          path: build/
+
+      - name: Deploy to staging
+        run: |
+          echo "Deploying to staging environment..."
+          # Add your deployment script here
+          # Example: rsync, scp, or cloud deployment commands
+
+      - name: Run smoke tests on staging
+        run: |
+          echo "Running smoke tests on staging..."
+          # Add smoke tests for staging environment
+
+  # Job 11: Release (production deployment)
+  release:
+    runs-on: ubuntu-latest
+    needs: [comprehensive-tests]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-files
+          path: build/
+
+      - name: Create release tag
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          
+          # Generate version based on timestamp
+          VERSION="v$(date +%Y.%m.%d)-build.${{ github.run_number }}"
+          git tag $VERSION
+          git push origin $VERSION
+
+      - name: Deploy to production
+        run: |
+          echo "Deploying to production environment..."
+          # Add your production deployment script here
+
+      - name: Run production smoke tests
+        run: |
+          echo "Running smoke tests on production..."
+          # Add smoke tests for production environment
+
+      - name: Notify team
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#deployments'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        if: always()
+
+# Workflow cleanup
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true

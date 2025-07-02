@@ -1,0 +1,19 @@
+{
+  "files": [
+    {
+      "path": "./build/static/js/main.*.js",
+      "maxSize": "200kb",
+      "compression": "gzip"
+    },
+    {
+      "path": "./build/static/css/main.*.css", 
+      "maxSize": "50kb",
+      "compression": "gzip"
+    },
+    {
+      "path": "./build/static/js/*.chunk.js",
+      "maxSize": "150kb",
+      "compression": "gzip"
+    }
+  ]
+}

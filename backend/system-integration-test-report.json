@@ -1,0 +1,478 @@
+{
+  "summary": {
+    "passed": 37,
+    "failed": 23,
+    "warnings": 0,
+    "total": 60,
+    "successRate": "61.7"
+  },
+  "tests": [
+    {
+      "name": "Database Connection",
+      "passed": true,
+      "details": "Connected in 38ms, 294 users",
+      "duration": 38,
+      "timestamp": "2025-06-27T04:53:37.729Z"
+    },
+    {
+      "name": "Server Health",
+      "passed": true,
+      "details": "Server accessible (no health endpoint)",
+      "duration": 131,
+      "timestamp": "2025-06-27T04:53:37.870Z"
+    },
+    {
+      "name": "Endpoint POST /auth/login",
+      "passed": true,
+      "details": "Status: 400",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:37.881Z"
+    },
+    {
+      "name": "Endpoint GET /users",
+      "passed": true,
+      "details": "Status: 404",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:37.888Z"
+    },
+    {
+      "name": "Endpoint GET /teams",
+      "passed": true,
+      "details": "Status: 401",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:37.894Z"
+    },
+    {
+      "name": "Endpoint GET /players",
+      "passed": true,
+      "details": "Status: 401",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:37.898Z"
+    },
+    {
+      "name": "Endpoint GET /matches",
+      "passed": true,
+      "details": "Status: 401",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:37.903Z"
+    },
+    {
+      "name": "Database Schema",
+      "passed": true,
+      "details": "All 10 required tables exist",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:37.905Z"
+    },
+    {
+      "name": "Admin Authentication",
+      "passed": true,
+      "details": "Login successful in 101ms",
+      "duration": 101,
+      "timestamp": "2025-06-27T04:53:38.006Z"
+    },
+    {
+      "name": "Coach Authentication",
+      "passed": true,
+      "details": "Found coach: coach_test",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.008Z"
+    },
+    {
+      "name": "Parent Authentication",
+      "passed": true,
+      "details": "Found parent: parent_test",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.008Z"
+    },
+    {
+      "name": "Admin Access GET /admin/users",
+      "passed": true,
+      "details": "Status: 200 (27ms)",
+      "duration": 27,
+      "timestamp": "2025-06-27T04:53:38.036Z"
+    },
+    {
+      "name": "Admin Access POST /users",
+      "passed": false,
+      "details": "Endpoint not found (404)",
+      "duration": 8,
+      "timestamp": "2025-06-27T04:53:38.044Z"
+    },
+    {
+      "name": "Admin Access GET /admin/analytics",
+      "passed": false,
+      "details": "Endpoint not found (404)",
+      "duration": 9,
+      "timestamp": "2025-06-27T04:53:38.053Z"
+    },
+    {
+      "name": "Coach Access GET /teams",
+      "passed": true,
+      "details": "Status: 200 (13ms)",
+      "duration": 13,
+      "timestamp": "2025-06-27T04:53:38.066Z"
+    },
+    {
+      "name": "Coach Access GET /players",
+      "passed": true,
+      "details": "Status: 200 (23ms)",
+      "duration": 23,
+      "timestamp": "2025-06-27T04:53:38.089Z"
+    },
+    {
+      "name": "Coach Access GET /trainings",
+      "passed": true,
+      "details": "Status: 200 (15ms)",
+      "duration": 15,
+      "timestamp": "2025-06-27T04:53:38.104Z"
+    },
+    {
+      "name": "Parent Access GET /parents/dashboard",
+      "passed": false,
+      "details": "Endpoint not found (404)",
+      "duration": 9,
+      "timestamp": "2025-06-27T04:53:38.113Z"
+    },
+    {
+      "name": "Parent Access GET /parents/notifications",
+      "passed": false,
+      "details": "Endpoint not found (404)",
+      "duration": 10,
+      "timestamp": "2025-06-27T04:53:38.123Z"
+    },
+    {
+      "name": "Token Security",
+      "passed": false,
+      "details": "Invalid token not rejected",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.128Z"
+    },
+    {
+      "name": "Admin User Creation",
+      "passed": true,
+      "details": "Created user: test_user_1751000018128",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.469Z"
+    },
+    {
+      "name": "Admin Team Management",
+      "passed": false,
+      "details": "Invalid response structure",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.479Z"
+    },
+    {
+      "name": "Admin Analytics",
+      "passed": false,
+      "details": "Analytics endpoint not implemented",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.484Z"
+    },
+    {
+      "name": "Admin Academy Management",
+      "passed": true,
+      "details": "Access to 5/5 management endpoints",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.535Z"
+    },
+    {
+      "name": "Coach Team Access",
+      "passed": false,
+      "details": "Cannot access teams",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.548Z"
+    },
+    {
+      "name": "Coach Player Management",
+      "passed": false,
+      "details": "Cannot access players",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.573Z"
+    },
+    {
+      "name": "Coach Match Recording",
+      "passed": false,
+      "details": "Cannot access matches",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.578Z"
+    },
+    {
+      "name": "Coach Training Management",
+      "passed": true,
+      "details": "Access to training data",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.584Z"
+    },
+    {
+      "name": "Parent Dashboard Access",
+      "passed": false,
+      "details": "Dashboard endpoint not found",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.589Z"
+    },
+    {
+      "name": "Parent Child Data Access",
+      "passed": true,
+      "details": "Access to 0 children",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.597Z"
+    },
+    {
+      "name": "Parent Data Isolation",
+      "passed": false,
+      "details": "Data isolation breach",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.602Z"
+    },
+    {
+      "name": "Parent Notifications",
+      "passed": false,
+      "details": "Notifications endpoint not found",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.607Z"
+    },
+    {
+      "name": "Performance GET /users",
+      "passed": true,
+      "details": "Avg: 4ms (target: <100ms)",
+      "duration": 4,
+      "timestamp": "2025-06-27T04:53:38.618Z"
+    },
+    {
+      "name": "Performance GET /teams",
+      "passed": true,
+      "details": "Avg: 10ms (target: <100ms)",
+      "duration": 10,
+      "timestamp": "2025-06-27T04:53:38.647Z"
+    },
+    {
+      "name": "Performance GET /players",
+      "passed": true,
+      "details": "Avg: 16ms (target: <100ms)",
+      "duration": 16,
+      "timestamp": "2025-06-27T04:53:38.696Z"
+    },
+    {
+      "name": "Performance GET /matches",
+      "passed": true,
+      "details": "Avg: 6ms (target: <100ms)",
+      "duration": 6,
+      "timestamp": "2025-06-27T04:53:38.713Z"
+    },
+    {
+      "name": "DB Performance User Count",
+      "passed": true,
+      "details": "1ms (target: <50ms)",
+      "duration": 1,
+      "timestamp": "2025-06-27T04:53:38.714Z"
+    },
+    {
+      "name": "DB Performance Player List",
+      "passed": true,
+      "details": "0ms (target: <50ms)",
+      "duration": 0,
+      "timestamp": "2025-06-27T04:53:38.714Z"
+    },
+    {
+      "name": "DB Performance Team Players",
+      "passed": true,
+      "details": "1ms (target: <50ms)",
+      "duration": 1,
+      "timestamp": "2025-06-27T04:53:38.715Z"
+    },
+    {
+      "name": "DB Performance Match Results",
+      "passed": true,
+      "details": "1ms (target: <50ms)",
+      "duration": 1,
+      "timestamp": "2025-06-27T04:53:38.716Z"
+    },
+    {
+      "name": "Memory Usage",
+      "passed": true,
+      "details": "Heap: 12MB/20MB (target: <200MB)",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.717Z"
+    },
+    {
+      "name": "SQL Injection Protection",
+      "passed": true,
+      "details": "Injection attempt properly handled",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.722Z"
+    },
+    {
+      "name": "XSS Protection",
+      "passed": true,
+      "details": "XSS payload handled appropriately",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.728Z"
+    },
+    {
+      "name": "Authentication Bypass Protection",
+      "passed": false,
+      "details": "Unauthorized access allowed",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.734Z"
+    },
+    {
+      "name": "Data Consistency - Player Teams",
+      "passed": true,
+      "details": "All player team references valid",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.735Z"
+    },
+    {
+      "name": "Data Consistency - Parent Child",
+      "passed": true,
+      "details": "All parent-child relationships valid",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.736Z"
+    },
+    {
+      "name": "FK Constraint Player Team FK",
+      "passed": true,
+      "details": "All references valid",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.736Z"
+    },
+    {
+      "name": "FK Constraint User Team FK",
+      "passed": false,
+      "details": "4 invalid references",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.736Z"
+    },
+    {
+      "name": "Data Validation Email Format",
+      "passed": true,
+      "details": "All data properly formatted",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.736Z"
+    },
+    {
+      "name": "Data Validation Birth Date Format",
+      "passed": true,
+      "details": "All data properly formatted",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.737Z"
+    },
+    {
+      "name": "API JSON /users",
+      "passed": false,
+      "details": "Request failed with status code 404",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.741Z"
+    },
+    {
+      "name": "API JSON /teams",
+      "passed": false,
+      "details": "Invalid response format",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.750Z"
+    },
+    {
+      "name": "API JSON /players",
+      "passed": false,
+      "details": "Invalid response format",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.768Z"
+    },
+    {
+      "name": "CORS Configuration",
+      "passed": true,
+      "details": "CORS headers present",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.772Z"
+    },
+    {
+      "name": "API Documentation Compliance",
+      "passed": false,
+      "details": "0/3 endpoints follow standard format",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.800Z"
+    },
+    {
+      "name": "Environment Configuration",
+      "passed": false,
+      "details": "0/3 environment variables configured",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.800Z"
+    },
+    {
+      "name": "Security Configuration",
+      "passed": false,
+      "details": "0/3 security measures detected",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.806Z"
+    },
+    {
+      "name": "Performance Optimization",
+      "passed": true,
+      "details": "1/3 optimizations detected",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.831Z"
+    },
+    {
+      "name": "Error Handling",
+      "passed": false,
+      "details": "Inconsistent error handling",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.868Z"
+    },
+    {
+      "name": "Logging Configuration",
+      "passed": false,
+      "details": "No logging configuration detected",
+      "duration": null,
+      "timestamp": "2025-06-27T04:53:38.868Z"
+    }
+  ],
+  "performance": [
+    {
+      "endpoint": "GET /users",
+      "averageTime": 4,
+      "times": [
+        4,
+        4,
+        3
+      ],
+      "target": 100,
+      "passed": true
+    },
+    {
+      "endpoint": "GET /teams",
+      "averageTime": 10,
+      "times": [
+        9,
+        10,
+        10
+      ],
+      "target": 100,
+      "passed": true
+    },
+    {
+      "endpoint": "GET /players",
+      "averageTime": 16,
+      "times": [
+        17,
+        17,
+        15
+      ],
+      "target": 100,
+      "passed": true
+    },
+    {
+      "endpoint": "GET /matches",
+      "averageTime": 6,
+      "times": [
+        6,
+        5,
+        6
+      ],
+      "target": 100,
+      "passed": true
+    }
+  ],
+  "timestamp": "2025-06-27T04:53:38.870Z"
+}
