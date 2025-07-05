@@ -1,0 +1,479 @@
+/* Enhanced QR Scanner Styles */
+
+.enhanced-qr-scanner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.qr-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+  transition: transform 0.3s ease;
+}
+
+.qr-canvas {
+  display: none;
+}
+
+/* Scanning overlay */
+.qr-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.qr-viewfinder {
+  position: relative;
+  width: 250px;
+  height: 250px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+}
+
+.qr-corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #f8b500;
+}
+
+.qr-corner--top-left {
+  top: -3px;
+  left: -3px;
+  border-right: none;
+  border-bottom: none;
+  border-top-left-radius: 12px;
+}
+
+.qr-corner--top-right {
+  top: -3px;
+  right: -3px;
+  border-left: none;
+  border-bottom: none;
+  border-top-right-radius: 12px;
+}
+
+.qr-corner--bottom-left {
+  bottom: -3px;
+  left: -3px;
+  border-right: none;
+  border-top: none;
+  border-bottom-left-radius: 12px;
+}
+
+.qr-corner--bottom-right {
+  bottom: -3px;
+  right: -3px;
+  border-left: none;
+  border-top: none;
+  border-bottom-right-radius: 12px;
+}
+
+.qr-scanning-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #f8b500, transparent);
+  animation: scanningLine 2s linear infinite;
+}
+
+@keyframes scanningLine {
+  0% {
+    top: 0;
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    top: calc(100% - 2px);
+    opacity: 0;
+  }
+}
+
+/* Controls */
+.qr-controls {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.qr-control-btn {
+  width: 48px;
+  height: 48px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.qr-control-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
+}
+
+.qr-control-btn.active {
+  background: #f8b500;
+  border-color: #f8b500;
+  color: #2c5530;
+}
+
+.qr-control-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.qr-zoom-indicator {
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Action controls */
+.qr-action-controls {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.qr-action-btn {
+  background: #2c5530;
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(44, 85, 48, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.qr-action-btn:hover {
+  background: #22471a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(44, 85, 48, 0.4);
+}
+
+.qr-action-btn:disabled {
+  background: #6b7280;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.qr-action-btn.scanning {
+  background: #ef4444;
+}
+
+.qr-action-btn.scanning:hover {
+  background: #dc2626;
+}
+
+.scanning-pulse {
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+/* Instructions */
+.qr-instructions {
+  position: absolute;
+  bottom: 5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: white;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.qr-instructions p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.qr-instructions p:first-child {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.qr-instructions p:last-child {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+/* Error states */
+.qr-scanner-error,
+.qr-error {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  z-index: 10;
+}
+
+.error-content {
+  text-align: center;
+  padding: 2rem;
+  max-width: 300px;
+}
+
+.error-icon {
+  width: 48px;
+  height: 48px;
+  color: #ef4444;
+  margin: 0 auto 1rem;
+}
+
+.error-content h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.error-content p {
+  margin: 0 0 1.5rem 0;
+  color: #d1d5db;
+  line-height: 1.5;
+}
+
+.error-content button {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.error-content button:hover {
+  background: #dc2626;
+}
+
+/* Permission prompt */
+.qr-permission-prompt {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  z-index: 10;
+}
+
+.permission-content {
+  text-align: center;
+  padding: 2rem;
+  max-width: 320px;
+}
+
+.permission-content h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f8b500;
+}
+
+.permission-content p {
+  margin: 0 0 1.5rem 0;
+  color: #d1d5db;
+  line-height: 1.5;
+}
+
+.permission-content button {
+  background: #f8b500;
+  color: #2c5530;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.permission-content button:hover {
+  background: #e6a500;
+  transform: translateY(-1px);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .qr-viewfinder {
+    width: 200px;
+    height: 200px;
+  }
+
+  .qr-controls {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .qr-control-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .qr-control-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .qr-action-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+  }
+
+  .qr-instructions {
+    bottom: 4rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .qr-instructions p {
+    font-size: 0.75rem;
+  }
+
+  .qr-instructions p:last-child {
+    font-size: 0.625rem;
+  }
+
+  .error-content,
+  .permission-content {
+    padding: 1.5rem;
+    max-width: 280px;
+  }
+}
+
+/* Landscape orientation */
+@media (orientation: landscape) and (max-height: 600px) {
+  .qr-viewfinder {
+    width: 180px;
+    height: 180px;
+  }
+
+  .qr-instructions {
+    bottom: 3rem;
+  }
+
+  .qr-action-controls {
+    bottom: 0.5rem;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .qr-scanning-line {
+    animation: none;
+    top: 50%;
+    opacity: 0.5;
+  }
+
+  .scanning-pulse {
+    animation: none;
+  }
+
+  .qr-control-btn:hover,
+  .qr-action-btn:hover {
+    transform: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .qr-overlay {
+    opacity: 1;
+  }
+
+  .qr-viewfinder {
+    border-color: #fff;
+  }
+
+  .qr-corner {
+    border-color: #fff;
+  }
+
+  .qr-scanning-line {
+    background: #fff;
+  }
+
+  .qr-control-btn {
+    background: #000;
+    border-color: #fff;
+  }
+
+  .qr-instructions {
+    background: #000;
+    border-color: #fff;
+  }
+}
+
+/* Dark mode support (inherent due to dark design) */
+@media (prefers-color-scheme: dark) {
+  /* Already optimized for dark mode */
+}

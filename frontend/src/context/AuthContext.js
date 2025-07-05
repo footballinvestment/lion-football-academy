@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import apiService from '../services/api';
 
 export const AuthContext = createContext();
@@ -7,56 +7,114 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [token, setToken] = useState(localStorage.getItem('token'));
+    const [isInitialized, setIsInitialized] = useState(false);
 
+    // Initialize authentication state on app load
     useEffect(() => {
-        if (token) {
-            verifyToken();
-        } else {
-            setLoading(false);
+        const initializeAuth = async () => {
+            console.log('🔄 AuthContext: Initializing authentication...');
+            const storedToken = localStorage.getItem('token');
+            const storedUser = localStorage.getItem('user');
+            
+            if (storedToken && storedUser) {
+                try {
+                    console.log('📦 AuthContext: Found stored auth data');
+                    const userData = JSON.parse(storedUser);
+                    setUser(userData);
+                    setToken(storedToken);
+                    apiService.setAuthToken(storedToken);
+                    
+                    // Verify token is still valid
+                    console.log('🔍 AuthContext: Verifying token...');
+                    const isValid = await verifyToken();
+                    console.log('✅ AuthContext: Token verification result:', isValid);
+                } catch (error) {
+                    console.error('❌ AuthContext: Error parsing stored user data:', error);
+                    clearAuthData();
+                }
+            } else {
+                console.log('📭 AuthContext: No stored auth data found');
+                setLoading(false);
+            }
+            setIsInitialized(true);
+            console.log('✅ AuthContext: Initialization complete');
+        };
+        
+        if (!isInitialized) {
+            initializeAuth();
         }
-    }, [token]);
+    }, [isInitialized, clearAuthData]);
 
-    const verifyToken = async () => {
+    const clearAuthData = useCallback(() => {
+        setUser(null);
+        setToken(null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        apiService.clearAuthToken();
+    }, []);
+
+    const verifyToken = useCallback(async () => {
         try {
+            console.log('🔍 AuthContext: Starting token verification...');
             const response = await apiService.auth.verify();
             if (response.data.success) {
-                setUser(response.data.user);
-                apiService.setAuthToken(token);
+                console.log('✅ AuthContext: Token verification successful');
+                const userData = response.data.user;
+                setUser(userData);
+                localStorage.setItem('user', JSON.stringify(userData));
+                return true;
             } else {
-                logout();
+                console.log('❌ AuthContext: Token verification failed - invalid token');
+                clearAuthData();
+                return false;
             }
         } catch (error) {
-            console.error('Token verification failed:', error);
-            logout();
+            console.error('❌ AuthContext: Token verification failed:', error);
+            clearAuthData();
+            return false;
         } finally {
+            console.log('🏁 AuthContext: Token verification complete, setting loading to false');
             setLoading(false);
         }
-    };
+    }, [clearAuthData]);
 
-    const login = async (username, password) => {
+    const login = useCallback(async (username, password, rememberMe = false) => {
         try {
+            setLoading(true);
             const response = await apiService.auth.login(username, password);
             
             if (response.data.success) {
-                const { user, tokens } = response.data;
+                const { user, token, refreshToken } = response.data;
+                
                 setUser(user);
-                setToken(tokens.accessToken);
-                localStorage.setItem('token', tokens.accessToken);
-                localStorage.setItem('refreshToken', tokens.refreshToken);
-                apiService.setAuthToken(tokens.accessToken);
+                setToken(token);
+                
+                // Store tokens and user data
+                const storage = rememberMe ? localStorage : sessionStorage;
+                storage.setItem('token', token);
+                storage.setItem('user', JSON.stringify(user));
+                
+                if (refreshToken) {
+                    storage.setItem('refreshToken', refreshToken);
+                }
+                
+                apiService.setAuthToken(token);
                 
                 return { success: true, user };
             } else {
-                return { success: false, error: response.data.message };
+                return { success: false, error: response.data.message || 'Login failed' };
             }
         } catch (error) {
             console.error('Login error:', error);
             return { 
                 success: false, 
-                error: error.response?.data?.message || 'Bejelentkezési hiba történt' 
+                error: error.response?.data?.message || 'Authentication failed. Please try again.' 
             };
+        } finally {
+            setLoading(false);
         }
-    };
+    }, []);
 
     const register = async (userData) => {
         try {
@@ -83,13 +141,21 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const logout = () => {
-        setUser(null);
-        setToken(null);
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        apiService.clearAuthToken();
-    };
+    const logout = useCallback(async (redirect = true) => {
+        try {
+            // Call logout API to invalidate token on server
+            await apiService.auth.logout();
+        } catch (error) {
+            console.error('Logout API call failed:', error);
+        } finally {
+            // Always clear local auth data
+            clearAuthData();
+            
+            if (redirect && window.location.pathname !== '/login') {
+                window.location.href = '/login';
+            }
+        }
+    }, [clearAuthData]);
 
     const refreshToken = async () => {
         try {
@@ -216,12 +282,14 @@ export const AuthProvider = ({ children }) => {
         user,
         loading,
         token,
+        isInitialized,
         login,
         register,
         logout,
         refreshToken,
         changePassword,
         verifyToken,
+        clearAuthData,
         
         // Role checks
         isAdmin: () => user?.role === 'admin',
@@ -246,7 +314,21 @@ export const AuthProvider = ({ children }) => {
         canAccessTeamEnhanced,
         
         // Authentication status
-        isAuthenticated: !!user
+        isAuthenticated: !!user && !!token,
+        hasRole: (role) => user?.role === role,
+        hasAnyRole: (roles) => roles.includes(user?.role),
+        
+        // User role-based redirects
+        getDefaultRoute: () => {
+            if (!user) return '/login';
+            switch (user.role) {
+                case 'admin': return '/admin/dashboard';
+                case 'coach': return '/coach/dashboard';
+                case 'player': return '/player/dashboard';
+                case 'parent': return '/parent/dashboard';
+                default: return '/login';
+            }
+        }
     };
 
     return (

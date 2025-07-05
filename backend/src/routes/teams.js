@@ -1,374 +1,281 @@
 const express = require('express');
 const router = express.Router();
-const Team = require('../models/Team');
-const Player = require('../models/Player');
-const { authenticate, isAdmin, isAdminOrCoach, canAccessTeam } = require('../middleware/auth');
+const database = require('../database/database');
+const { authenticate, authorize, rateLimit, securityHeaders } = require('../middleware/auth');
 
-const validateTeam = (teamData) => {
-    const errors = [];
-    if (!teamData.name || teamData.name.trim() === '') {
-        errors.push('Csapat név kötelező');
-    }
-    if (!teamData.age_group || teamData.age_group.trim() === '') {
-        errors.push('Korosztály kötelező');
-    }
-    return errors;
-};
+// Apply security headers to all routes
+router.use(securityHeaders);
 
-// GET /api/teams/available-coaches - Nem hozzárendelt edzők listája (csak admin)
-router.get('/available-coaches', authenticate, isAdmin, async (req, res) => {
+// Apply rate limiting to team routes
+router.use(rateLimit({
+    maxRequests: 100,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    message: 'Too many team requests, please try again later'
+}));
+
+// All routes require authentication
+router.use(authenticate);
+
+// GET /api/teams - List teams with role-based filtering
+router.get('/', async (req, res) => {
     try {
-        const User = require('../models/User');
-        
-        // Get all coaches
-        const allCoaches = await User.findByRole('coach');
-        
-        // Filter available coaches (not assigned to any team)
-        const availableCoaches = allCoaches.filter(coach => !coach.team_id);
+        let query = `
+            SELECT 
+                t.*,
+                COUNT(DISTINCT p.id) as player_count,
+                COUNT(DISTINCT c.id) as coach_count,
+                c.id as coach_id,
+                u.first_name as coach_first_name,
+                u.last_name as coach_last_name
+            FROM teams t
+            LEFT JOIN players p ON t.id = p.team_id AND p.is_active = 1
+            LEFT JOIN coaches c ON t.id = c.team_id AND c.is_active = 1
+            LEFT JOIN users u ON c.user_id = u.id
+            WHERE t.is_active = 1
+        `;
+        const params = [];
 
-        res.json({
-            success: true,
-            coaches: availableCoaches,
-            count: availableCoaches.length
-        });
-    } catch (error) {
-        console.error('Available coaches fetch error:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// GET /api/teams - User context alapú csapat listázás
-router.get('/', authenticate, async (req, res) => {
-    try {
-        if (req.user.role === 'admin') {
-            // Admin összes csapatot látja
-            const teams = await Team.findAll();
+        // Role-based filtering
+        if (req.user.role === 'coach') {
+            // Get coach's team only
+            const coach = await database.get(`
+                SELECT team_id FROM coaches WHERE user_id = ?
+            `, [req.user.id]);
             
-            // Játékosok számának hozzáadása minden csapathoz
-            const teamsWithPlayerCount = await Promise.all(
-                teams.map(async (team) => {
-                    const playerCount = await Team.getPlayersCount(team.id);
-                    return { ...team, player_count: playerCount };
-                })
-            );
+            if (coach && coach.team_id) {
+                query += ' AND t.id = ?';
+                params.push(coach.team_id);
+            } else {
+                return res.json({ success: true, teams: [], count: 0 });
+            }
+        } else if (req.user.role === 'player') {
+            // Get player's team only
+            const player = await database.get(`
+                SELECT team_id FROM players WHERE user_id = ?
+            `, [req.user.id]);
             
-            return res.json(teamsWithPlayerCount);
-        }
-        
-        if (req.user.team_id) {
-            // Coach/Parent csak saját csapatot
-            const team = await Team.findById(req.user.team_id);
-            if (team) {
-                const playerCount = await Team.getPlayersCount(team.id);
-                return res.json([{ ...team, player_count: playerCount }]);
+            if (player && player.team_id) {
+                query += ' AND t.id = ?';
+                params.push(player.team_id);
+            } else {
+                return res.json({ success: true, teams: [], count: 0 });
+            }
+        } else if (req.user.role === 'parent') {
+            // Get parent's children teams
+            const childrenTeams = await database.all(`
+                SELECT DISTINCT p.team_id
+                FROM family_relationships fr
+                JOIN players p ON fr.player_id = p.id
+                WHERE fr.parent_id = ? AND p.team_id IS NOT NULL
+            `, [req.user.id]);
+            
+            if (childrenTeams.length > 0) {
+                const teamIds = childrenTeams.map(ct => ct.team_id);
+                const placeholders = teamIds.map(() => '?').join(',');
+                query += ` AND t.id IN (${placeholders})`;
+                params.push(...teamIds);
+            } else {
+                return res.json({ success: true, teams: [], count: 0 });
             }
         }
-        
-        // Ha nincs team_id, üres lista
-        res.json([]);
+        // Admin sees all teams (no additional filtering)
+
+        query += `
+            GROUP BY t.id, t.name, t.age_group, t.division, t.description, t.home_venue, t.founded_year, t.is_active, t.created_at, t.updated_at, c.id, u.first_name, u.last_name
+            ORDER BY t.name ASC
+        `;
+
+        const teams = await database.all(query, params);
+
+        res.status(200).json({
+            success: true,
+            message: 'Teams retrieved successfully',
+            teams: teams.map(team => ({
+                ...team,
+                coach_name: team.coach_first_name && team.coach_last_name 
+                    ? `${team.coach_first_name} ${team.coach_last_name}` 
+                    : null
+            })),
+            count: teams.length
+        });
+
     } catch (error) {
         console.error('Teams fetch error:', error);
-        res.status(500).json({ error: 'Server error fetching teams' });
+        res.status(500).json({
+            success: false,
+            error: 'Server error',
+            message: 'Failed to retrieve teams'
+        });
     }
 });
 
-// GET /api/teams/:id - Egy csapat adatai
-router.get('/:id', authenticate, canAccessTeam, async (req, res) => {
+// POST /api/teams - Create new team (admin only)
+router.post('/', authorize(['admin']), async (req, res) => {
     try {
-        const team = await Team.findById(req.params.id);
-        if (!team) {
-            return res.status(404).json({ error: 'Csapat nem található' });
-        }
-        
-        const playerCount = await Team.getPlayersCount(team.id);
-        res.json({ ...team, player_count: playerCount });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
+        const {
+            name,
+            age_group,
+            division,
+            description,
+            home_venue,
+            founded_year
+        } = req.body;
 
-// POST /api/teams - Új csapat létrehozása
-router.post('/', authenticate, isAdminOrCoach, async (req, res) => {
-    try {
-        const errors = validateTeam(req.body);
-        if (errors.length > 0) {
-            return res.status(400).json({ errors });
-        }
-
-        const result = await Team.create(req.body);
-        const newTeam = await Team.findById(result.id);
-        res.status(201).json(newTeam);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// PUT /api/teams/:id - Csapat módosítása
-router.put('/:id', authenticate, isAdminOrCoach, canAccessTeam, async (req, res) => {
-    try {
-        const errors = validateTeam(req.body);
-        if (errors.length > 0) {
-            return res.status(400).json({ errors });
-        }
-
-        const existingTeam = await Team.findById(req.params.id);
-        if (!existingTeam) {
-            return res.status(404).json({ error: 'Csapat nem található' });
-        }
-
-        await Team.update(req.params.id, req.body);
-        const updatedTeam = await Team.findById(req.params.id);
-        res.json(updatedTeam);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// DELETE /api/teams/:id - Csapat törlése (csak admin)
-router.delete('/:id', authenticate, isAdmin, async (req, res) => {
-    try {
-        const existingTeam = await Team.findById(req.params.id);
-        if (!existingTeam) {
-            return res.status(404).json({ error: 'Csapat nem található' });
-        }
-
-        // Ellenőrizzük, hogy vannak-e játékosok a csapatban
-        const playerCount = await Team.getPlayersCount(req.params.id);
-        if (playerCount > 0) {
-            return res.status(400).json({ 
-                error: 'Nem törölhető olyan csapat, amelyben vannak játékosok' 
+        // Validate required fields
+        if (!name || !age_group) {
+            return res.status(400).json({
+                success: false,
+                error: 'Validation error',
+                message: 'name and age_group are required'
             });
         }
 
-        await Team.delete(req.params.id);
-        res.json({ message: 'Csapat sikeresen törölve' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
+        // Check if team name already exists
+        const existingTeam = await database.get(`
+            SELECT id FROM teams WHERE name = ? AND is_active = 1
+        `, [name]);
 
-// GET /api/teams/:id/players - Csapat játékosai
-router.get('/:id/players', authenticate, canAccessTeam, async (req, res) => {
-    try {
-        const team = await Team.findById(req.params.id);
-        if (!team) {
-            return res.status(404).json({ error: 'Csapat nem található' });
-        }
-
-        const players = await Player.findByTeam(req.params.id);
-        res.json(players);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// POST /api/teams/:id/players/:playerId - Játékos hozzáadása csapathoz
-router.post('/:id/players/:playerId', authenticate, isAdminOrCoach, canAccessTeam, async (req, res) => {
-    try {
-        const team = await Team.findById(req.params.id);
-        if (!team) {
-            return res.status(404).json({ error: 'Csapat nem található' });
-        }
-
-        const player = await Player.findById(req.params.playerId);
-        if (!player) {
-            return res.status(404).json({ error: 'Játékos nem található' });
-        }
-
-        // Játékos csapathoz rendelése
-        await Player.update(req.params.playerId, { ...player, team_id: req.params.id });
-        
-        const updatedPlayer = await Player.findById(req.params.playerId);
-        res.json({ 
-            message: 'Játékos sikeresen hozzáadva a csapathoz',
-            player: updatedPlayer 
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// DELETE /api/teams/:id/players/:playerId - Játékos eltávolítása csapatból
-router.delete('/:id/players/:playerId', authenticate, isAdminOrCoach, canAccessTeam, async (req, res) => {
-    try {
-        const team = await Team.findById(req.params.id);
-        if (!team) {
-            return res.status(404).json({ error: 'Csapat nem található' });
-        }
-
-        const player = await Player.findById(req.params.playerId);
-        if (!player) {
-            return res.status(404).json({ error: 'Játékos nem található' });
-        }
-
-        if (player.team_id != req.params.id) {
-            return res.status(400).json({ error: 'A játékos nem tagja ennek a csapatnak' });
-        }
-
-        // Játékos eltávolítása a csapatból
-        await Player.update(req.params.playerId, { ...player, team_id: null });
-        
-        const updatedPlayer = await Player.findById(req.params.playerId);
-        res.json({ 
-            message: 'Játékos sikeresen eltávolítva a csapatból',
-            player: updatedPlayer 
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// PUT /api/teams/:id/assign-coach - Edző hozzárendelése csapathoz
-router.put('/:id/assign-coach', authenticate, isAdminOrCoach, async (req, res) => {
-    try {
-        const { coachId } = req.body;
-        const teamId = req.params.id;
-
-        if (!coachId) {
-            return res.status(400).json({ error: 'Coach ID is required' });
-        }
-
-        // Check if team exists
-        const team = await Team.findById(teamId);
-        if (!team) {
-            return res.status(404).json({ error: 'Csapat nem található' });
-        }
-
-        // Check if coach exists and has coach role
-        const User = require('../models/User');
-        const coach = await User.findById(coachId);
-        if (!coach) {
-            return res.status(404).json({ error: 'Edző nem található' });
-        }
-
-        if (coach.role !== 'coach') {
-            return res.status(400).json({ error: 'A felhasználó nem edző' });
-        }
-
-        // Check if coach is already assigned to another team
-        if (coach.team_id && coach.team_id !== parseInt(teamId)) {
-            return res.status(400).json({ 
-                error: 'Az edző már egy másik csapathoz van hozzárendelve',
-                currentTeam: coach.team_name 
+        if (existingTeam) {
+            return res.status(400).json({
+                success: false,
+                error: 'Team already exists',
+                message: 'A team with this name already exists'
             });
         }
 
-        // Assign coach to team
-        await User.update(coachId, {
-            username: coach.username,
-            email: coach.email,
-            full_name: coach.full_name,
-            role: coach.role,
-            team_id: teamId,
-            player_id: coach.player_id,
-            active: coach.active
-        });
+        const teamId = require('crypto').randomBytes(16).toString('hex');
 
-        // Update team with coach name
-        await Team.update(teamId, {
-            ...team,
-            coach_name: coach.full_name
-        });
+        await database.run(`
+            INSERT INTO teams (
+                id, name, age_group, division, description,
+                home_venue, founded_year, is_active
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+        `, [
+            teamId,
+            name,
+            age_group,
+            division,
+            description,
+            home_venue,
+            founded_year
+        ]);
 
-        const updatedTeam = await Team.findById(teamId);
-        const updatedCoach = await User.findById(coachId);
+        // Get the created team
+        const newTeam = await database.get(`
+            SELECT 
+                t.*,
+                COUNT(DISTINCT p.id) as player_count,
+                COUNT(DISTINCT c.id) as coach_count
+            FROM teams t
+            LEFT JOIN players p ON t.id = p.team_id AND p.is_active = 1
+            LEFT JOIN coaches c ON t.id = c.team_id AND c.is_active = 1
+            WHERE t.id = ?
+            GROUP BY t.id
+        `, [teamId]);
 
-        res.json({
+        res.status(201).json({
             success: true,
-            message: 'Edző sikeresen hozzárendelve a csapathoz',
-            team: updatedTeam,
-            coach: updatedCoach
+            message: 'Team created successfully',
+            team: newTeam
         });
+
     } catch (error) {
-        console.error('Coach assignment error:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Team creation error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Server error',
+            message: 'Failed to create team'
+        });
     }
 });
 
-// DELETE /api/teams/:id/coach - Edző eltávolítása csapatból
-router.delete('/:id/coach', authenticate, isAdminOrCoach, async (req, res) => {
+// GET /api/teams/:id - Get single team details
+router.get('/:id', async (req, res) => {
     try {
-        const teamId = req.params.id;
-
-        // Check if team exists
-        const team = await Team.findById(teamId);
+        const team = await database.get(`
+            SELECT 
+                t.*,
+                COUNT(DISTINCT p.id) as player_count,
+                COUNT(DISTINCT c.id) as coach_count,
+                c.id as coach_id,
+                u.first_name as coach_first_name,
+                u.last_name as coach_last_name
+            FROM teams t
+            LEFT JOIN players p ON t.id = p.team_id AND p.is_active = 1
+            LEFT JOIN coaches c ON t.id = c.team_id AND c.is_active = 1
+            LEFT JOIN users u ON c.user_id = u.id
+            WHERE t.id = ? AND t.is_active = 1
+            GROUP BY t.id
+        `, [req.params.id]);
+        
         if (!team) {
-            return res.status(404).json({ error: 'Csapat nem található' });
-        }
-
-        // Find coach assigned to this team
-        const User = require('../models/User');
-        const coaches = await User.getUsersByTeam(teamId);
-        const teamCoach = coaches.find(user => user.role === 'coach');
-
-        if (!teamCoach) {
-            return res.status(404).json({ error: 'Nincs edző hozzárendelve ehhez a csapathoz' });
-        }
-
-        // Remove coach from team
-        await User.update(teamCoach.id, {
-            username: teamCoach.username,
-            email: teamCoach.email,
-            full_name: teamCoach.full_name,
-            role: teamCoach.role,
-            team_id: null,
-            player_id: teamCoach.player_id,
-            active: teamCoach.active
-        });
-
-        // Update team to remove coach name
-        await Team.update(teamId, {
-            ...team,
-            coach_name: null
-        });
-
-        const updatedTeam = await Team.findById(teamId);
-
-        res.json({
-            success: true,
-            message: 'Edző sikeresen eltávolítva a csapatból',
-            team: updatedTeam,
-            removedCoach: teamCoach.full_name
-        });
-    } catch (error) {
-        console.error('Coach removal error:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-
-// GET /api/teams/:id/coach - Csapat edzőjének lekérése
-router.get('/:id/coach', authenticate, canAccessTeam, async (req, res) => {
-    try {
-        const teamId = req.params.id;
-
-        // Check if team exists
-        const team = await Team.findById(teamId);
-        if (!team) {
-            return res.status(404).json({ error: 'Csapat nem található' });
-        }
-
-        // Find coach assigned to this team
-        const User = require('../models/User');
-        const coaches = await User.getUsersByTeam(teamId);
-        const teamCoach = coaches.find(user => user.role === 'coach');
-
-        if (!teamCoach) {
-            return res.json({
-                success: true,
-                coach: null,
-                message: 'Nincs edző hozzárendelve ehhez a csapathoz'
+            return res.status(404).json({
+                success: false,
+                error: 'Team not found',
+                message: 'Team with specified ID does not exist'
             });
         }
 
-        res.json({
+        // Role-based access control
+        let hasAccess = false;
+        if (req.user.role === 'admin') {
+            hasAccess = true;
+        } else if (req.user.role === 'coach') {
+            const coach = await database.get(`
+                SELECT team_id FROM coaches WHERE user_id = ?
+            `, [req.user.id]);
+            hasAccess = coach && coach.team_id === team.id;
+        } else if (req.user.role === 'player') {
+            const player = await database.get(`
+                SELECT team_id FROM players WHERE user_id = ?
+            `, [req.user.id]);
+            hasAccess = player && player.team_id === team.id;
+        } else if (req.user.role === 'parent') {
+            const childrenTeams = await database.all(`
+                SELECT DISTINCT p.team_id
+                FROM family_relationships fr
+                JOIN players p ON fr.player_id = p.id
+                WHERE fr.parent_id = ?
+            `, [req.user.id]);
+            hasAccess = childrenTeams.some(ct => ct.team_id === team.id);
+        }
+
+        if (!hasAccess) {
+            return res.status(403).json({
+                success: false,
+                error: 'Access denied',
+                message: 'You do not have permission to view this team'
+            });
+        }
+        
+        res.status(200).json({
             success: true,
-            coach: teamCoach
+            message: 'Team retrieved successfully',
+            team: {
+                ...team,
+                coach_name: team.coach_first_name && team.coach_last_name 
+                    ? `${team.coach_first_name} ${team.coach_last_name}` 
+                    : null
+            }
         });
     } catch (error) {
-        console.error('Team coach fetch error:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Team fetch error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Server error',
+            message: 'Failed to retrieve team'
+        });
     }
 });
+
+
+
+
+
+
+
+
+
+
 
 module.exports = router;

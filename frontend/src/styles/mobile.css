@@ -558,3 +558,442 @@
     display: none !important;
   }
 }
+
+/* ==========================================================================
+   10. CRITICAL CSS OPTIMIZATIONS
+   ========================================================================== */
+
+/* CSS Custom Properties for dynamic theming */
+:root {
+  /* Lion Football Academy colors */
+  --lfa-primary: #2c5530;
+  --lfa-secondary: #f8b500;
+  --lfa-success: #22c55e;
+  --lfa-warning: #f59e0b;
+  --lfa-danger: #ef4444;
+  --lfa-info: #3b82f6;
+  
+  /* Performance-critical spacing */
+  --touch-target-min: 44px;
+  --touch-target-comfort: 48px;
+  --border-radius-base: 8px;
+  --border-radius-large: 12px;
+  
+  /* Motion and transitions */
+  --transition-fast: 0.15s ease-out;
+  --transition-base: 0.2s ease-in-out;
+  --transition-slow: 0.3s ease-in-out;
+  
+  /* Typography scale */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  
+  /* Z-index scale */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
+
+/* Performance optimizations */
+* {
+  box-sizing: border-box;
+}
+
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Optimize font rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeSpeed;
+}
+
+/* ==========================================================================
+   11. MODERN MOBILE FEATURES
+   ========================================================================== */
+
+/* Safe area insets for notched devices */
+.safe-area-inset {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.safe-area-inset-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Viewport units that account for mobile browsers */
+.full-height-mobile {
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height */
+}
+
+.full-width-mobile {
+  width: 100vw;
+  width: 100dvw; /* Dynamic viewport width */
+}
+
+/* PWA optimizations */
+.pwa-installable {
+  display: none;
+}
+
+@media (display-mode: standalone) {
+  .pwa-only {
+    display: block;
+  }
+  
+  .pwa-installable {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   12. ENHANCED TOUCH INTERACTIONS
+   ========================================================================== */
+
+/* Enhanced touch targets */
+.touch-target {
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.touch-target-large {
+  min-height: var(--touch-target-comfort);
+  min-width: var(--touch-target-comfort);
+}
+
+/* Haptic feedback simulation with visual feedback */
+.haptic-feedback {
+  transition: transform var(--transition-fast);
+}
+
+.haptic-feedback:active {
+  transform: scale(0.95);
+}
+
+/* Voice input button styles */
+.voice-input-button {
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  border-radius: 50%;
+  border: 2px solid var(--lfa-primary);
+  background: white;
+  color: var(--lfa-primary);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.voice-input-button.listening {
+  background: var(--lfa-primary);
+  color: white;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.voice-input-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.voice-input-icon {
+  width: 20px;
+  height: 20px;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(44, 85, 48, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(44, 85, 48, 0);
+  }
+}
+
+/* ==========================================================================
+   13. PERFORMANCE OPTIMIZATIONS
+   ========================================================================== */
+
+/* GPU acceleration for smooth animations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Lazy loading optimization */
+.lazy-loading {
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.lazy-loading.loaded {
+  opacity: 1;
+}
+
+/* Reduce layout thrashing */
+.no-layout-thrash {
+  contain: layout style paint;
+}
+
+/* Critical above-the-fold content */
+.above-fold {
+  contain: layout;
+  content-visibility: auto;
+}
+
+/* ==========================================================================
+   14. ADVANCED RESPONSIVE DESIGN
+   ========================================================================== */
+
+/* Container queries support */
+@supports (container-type: inline-size) {
+  .responsive-container {
+    container-type: inline-size;
+  }
+  
+  @container (max-width: 400px) {
+    .container-responsive {
+      flex-direction: column;
+    }
+  }
+}
+
+/* Advanced viewport-based typography */
+.responsive-text {
+  font-size: clamp(1rem, 4vw, 1.5rem);
+  line-height: 1.4;
+}
+
+.responsive-text-small {
+  font-size: clamp(0.875rem, 3vw, 1.125rem);
+}
+
+.responsive-text-large {
+  font-size: clamp(1.25rem, 5vw, 2rem);
+}
+
+/* Fluid spacing */
+.fluid-spacing {
+  margin: clamp(1rem, 3vw, 2rem);
+  padding: clamp(1rem, 3vw, 2rem);
+}
+
+/* ==========================================================================
+   15. DARK MODE SUPPORT
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-primary: #1f2937;
+    --background-secondary: #374151;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --border-color: #4b5563;
+  }
+  
+  body {
+    background-color: var(--background-primary);
+    color: var(--text-primary);
+  }
+  
+  .card {
+    background-color: var(--background-secondary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+  
+  .btn {
+    border-color: var(--border-color);
+  }
+  
+  .form-control {
+    background-color: var(--background-secondary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+  
+  .form-control::placeholder {
+    color: var(--text-secondary);
+  }
+}
+
+/* ==========================================================================
+   16. ACCESSIBILITY ENHANCEMENTS
+   ========================================================================== */
+
+/* Skip link for keyboard users */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--lfa-primary);
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  border-radius: var(--border-radius-base);
+  z-index: var(--z-tooltip);
+  transition: top var(--transition-base);
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Enhanced focus indicators */
+.focus-visible:focus-visible {
+  outline: 2px solid var(--lfa-secondary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(248, 181, 0, 0.2);
+}
+
+/* Screen reader improvements */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* High contrast mode enhancements */
+@media (prefers-contrast: high) {
+  .btn,
+  .form-control,
+  .card {
+    border-width: 2px;
+    border-style: solid;
+  }
+  
+  .btn:focus,
+  .form-control:focus {
+    outline-width: 3px;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .haptic-feedback:active {
+    transform: none;
+  }
+}
+
+/* ==========================================================================
+   17. DEVICE-SPECIFIC OPTIMIZATIONS
+   ========================================================================== */
+
+/* iPhone specific optimizations */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari specific styles */
+  .ios-safe-area {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Prevent zoom on form focus */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Android specific optimizations */
+@media screen and (-webkit-device-pixel-ratio: 1) {
+  /* Android Chrome specific styles */
+  .android-optimized {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Foldable device support */
+@media (spanning: single-fold-vertical) {
+  .foldable-layout {
+    flex-direction: row;
+  }
+}
+
+@media (spanning: single-fold-horizontal) {
+  .foldable-layout {
+    flex-direction: column;
+  }
+}
+
+/* ==========================================================================
+   18. PRINT OPTIMIZATIONS
+   ========================================================================== */
+
+@media print {
+  /* Hide non-essential elements */
+  .no-print,
+  .btn,
+  .navbar,
+  .sidebar,
+  .modal,
+  .dropdown,
+  .fab {
+    display: none !important;
+  }
+  
+  /* Optimize for print */
+  body {
+    font-size: 12pt;
+    line-height: 1.4;
+    color: #000;
+    background: #fff;
+  }
+  
+  .card {
+    border: 1px solid #000;
+    break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+  
+  /* Page breaks */
+  .page-break-before {
+    page-break-before: always;
+  }
+  
+  .page-break-after {
+    page-break-after: always;
+  }
+  
+  .page-break-inside-avoid {
+    page-break-inside: avoid;
+  }
+}

@@ -1,0 +1,1285 @@
+/* Analytics Base Styles */
+.coach-analytics,
+.parent-analytics,
+.player-analytics {
+    padding: var(--space-4);
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: calc(100vh - var(--navbar-height));
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+/* Header Styles */
+.coach-analytics__header,
+.parent-analytics__header,
+.player-analytics__header {
+    margin-bottom: var(--space-6);
+}
+
+.coach-analytics__header-content,
+.parent-analytics__header-content,
+.player-analytics__header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+}
+
+.coach-analytics__title h1,
+.parent-analytics__title h1,
+.player-analytics__title h1 {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-2);
+    background: linear-gradient(135deg, var(--lion-primary) 0%, var(--lion-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.coach-analytics__title p,
+.parent-analytics__title p,
+.player-analytics__title p {
+    font-size: var(--font-size-lg);
+    color: var(--gray-600);
+    margin: 0;
+}
+
+.coach-analytics__header-actions,
+.parent-analytics__header-actions,
+.player-analytics__header-actions {
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.coach-analytics__team-filter,
+.coach-analytics__period-filter,
+.parent-analytics__child-filter,
+.parent-analytics__period-filter,
+.player-analytics__period-filter,
+.player-analytics__season-filter {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    background: var(--white);
+    font-size: var(--font-size-sm);
+    color: var(--gray-700);
+    min-width: 120px;
+}
+
+.coach-analytics__team-filter:focus,
+.coach-analytics__period-filter:focus,
+.parent-analytics__child-filter:focus,
+.parent-analytics__period-filter:focus,
+.player-analytics__period-filter:focus,
+.player-analytics__season-filter:focus {
+    outline: none;
+    border-color: var(--lion-primary);
+    box-shadow: 0 0 0 3px var(--lion-primary-light);
+}
+
+/* Loading States */
+.coach-analytics__loading,
+.parent-analytics__loading,
+.player-analytics__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: var(--space-4);
+}
+
+.coach-analytics__loading p,
+.parent-analytics__loading p,
+.player-analytics__loading p {
+    color: var(--gray-600);
+    font-size: var(--font-size-lg);
+}
+
+.parent-analytics__empty,
+.player-analytics__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: var(--space-4);
+    text-align: center;
+}
+
+/* Child/Player Banner */
+.parent-analytics__child-banner,
+.player-analytics__player-banner {
+    background: linear-gradient(135deg, var(--lion-primary-light) 0%, var(--white) 100%);
+    border: 1px solid var(--lion-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+.parent-analytics__child-info,
+.player-analytics__player-info {
+    display: flex;
+    gap: var(--space-4);
+    align-items: center;
+}
+
+.parent-analytics__child-avatar,
+.player-analytics__player-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 3px solid var(--white);
+    box-shadow: var(--shadow-md);
+}
+
+.parent-analytics__child-avatar img,
+.parent-analytics__child-initials,
+.player-analytics__player-avatar img,
+.player-analytics__player-initials {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-full);
+}
+
+.parent-analytics__child-initials,
+.player-analytics__player-initials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--lion-primary);
+    color: var(--white);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+}
+
+.parent-analytics__child-details,
+.player-analytics__player-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.parent-analytics__child-details h2,
+.player-analytics__player-details h2 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--gray-900);
+    margin: 0 0 var(--space-1) 0;
+}
+
+.parent-analytics__child-details p,
+.player-analytics__player-details p {
+    font-size: var(--font-size-base);
+    color: var(--gray-600);
+    margin: 0 0 var(--space-2) 0;
+}
+
+.player-analytics__xp-bar {
+    position: relative;
+    height: 20px;
+    background: var(--gray-200);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-top: var(--space-2);
+}
+
+.player-analytics__xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--lion-primary) 0%, var(--lion-secondary) 100%);
+    border-radius: var(--radius-full);
+    transition: width var(--transition-slow);
+}
+
+.player-analytics__xp-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    color: var(--white);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.parent-analytics__child-stats,
+.parent-analytics__quick-stat,
+.player-analytics__player-stats,
+.player-analytics__quick-stat {
+    display: flex;
+    gap: var(--space-4);
+}
+
+.parent-analytics__quick-stat,
+.player-analytics__quick-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.parent-analytics__stat-value,
+.player-analytics__stat-value {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--lion-primary);
+    line-height: 1;
+}
+
+.parent-analytics__stat-label,
+.player-analytics__stat-label {
+    font-size: var(--font-size-xs);
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: var(--space-1);
+}
+
+/* Section Styles */
+.coach-analytics__section,
+.parent-analytics__section,
+.player-analytics__section {
+    padding: var(--space-4);
+}
+
+.coach-analytics__section h3,
+.parent-analytics__section h3,
+.player-analytics__section h3 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-6);
+    text-align: center;
+}
+
+/* Metrics Grid */
+.coach-analytics__metrics-grid,
+.parent-analytics__metrics-grid,
+.player-analytics__achievement-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+.coach-analytics__metric-card,
+.parent-analytics__metric-card,
+.player-analytics__achievement-card {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    display: flex;
+    gap: var(--space-3);
+    transition: transform var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+}
+
+.coach-analytics__metric-card:hover,
+.parent-analytics__metric-card:hover,
+.player-analytics__achievement-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.coach-analytics__metric-icon,
+.parent-analytics__metric-icon,
+.player-analytics__achievement-icon {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--lion-primary-light);
+    border-radius: var(--radius-lg);
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.coach-analytics__metric-content,
+.parent-analytics__metric-content,
+.player-analytics__achievement-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.coach-analytics__metric-content h4,
+.parent-analytics__metric-content h4,
+.player-analytics__achievement-content h4 {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-700);
+    margin: 0 0 var(--space-2) 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.coach-analytics__metric-value,
+.parent-analytics__metric-value,
+.player-analytics__achievement-value {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-1);
+    line-height: 1.2;
+}
+
+.coach-analytics__metric-trend,
+.parent-analytics__metric-trend,
+.player-analytics__achievement-progress {
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    margin: 0;
+}
+
+/* Charts Grid */
+.coach-analytics__charts-grid,
+.parent-analytics__charts-grid,
+.player-analytics__charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+.coach-analytics__chart-container {
+    min-height: 400px;
+}
+
+/* Privacy Note */
+.parent-analytics__privacy-note {
+    background: var(--info-light);
+    border: 1px solid var(--info);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    font-size: var(--font-size-sm);
+    color: var(--info-dark);
+    margin-bottom: var(--space-4);
+    text-align: center;
+}
+
+/* Tables */
+.coach-analytics__stats-table,
+.coach-analytics__league-table,
+.player-analytics__match-table {
+    margin-top: var(--space-6);
+}
+
+.coach-analytics__stats-table h4,
+.coach-analytics__league-table h4,
+.player-analytics__match-table h4 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-4);
+    text-align: center;
+}
+
+.coach-analytics__table-wrapper,
+.player-analytics__table-wrapper {
+    overflow-x: auto;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    background: var(--white);
+}
+
+.coach-analytics__table,
+.player-analytics__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
+}
+
+.coach-analytics__table th,
+.coach-analytics__table td,
+.player-analytics__table th,
+.player-analytics__table td {
+    padding: var(--space-3);
+    text-align: left;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.coach-analytics__table th,
+.player-analytics__table th {
+    background: var(--gray-50);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-700);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: var(--font-size-xs);
+}
+
+.coach-analytics__current-team {
+    background: var(--lion-primary-light);
+    font-weight: var(--font-weight-semibold);
+}
+
+.coach-analytics__player-name,
+.coach-analytics__team-name {
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+}
+
+.coach-analytics__rating,
+.player-analytics__rating {
+    font-weight: var(--font-weight-bold);
+    color: var(--lion-primary);
+}
+
+.coach-analytics__points {
+    font-weight: var(--font-weight-bold);
+    color: var(--gray-900);
+}
+
+.positive {
+    color: var(--success);
+}
+
+.negative {
+    color: var(--error);
+}
+
+.player-analytics__result--win {
+    color: var(--success);
+}
+
+.player-analytics__result--draw {
+    color: var(--warning-dark);
+}
+
+.player-analytics__result--loss {
+    color: var(--error);
+}
+
+.coach-analytics__no-data,
+.player-analytics__no-data {
+    text-align: center;
+    color: var(--gray-500);
+    font-style: italic;
+    padding: var(--space-6);
+}
+
+/* Insights and Feedback */
+.coach-analytics__insights,
+.parent-analytics__insights,
+.player-analytics__insights,
+.parent-analytics__feedback-section {
+    margin-top: var(--space-6);
+}
+
+.coach-analytics__insights h4,
+.parent-analytics__insights h4,
+.player-analytics__insights h4,
+.parent-analytics__feedback-section h4 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-4);
+    text-align: center;
+}
+
+.coach-analytics__insights-grid,
+.parent-analytics__insights-grid,
+.player-analytics__insights-grid,
+.parent-analytics__feedback-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-3);
+}
+
+.coach-analytics__insight-card,
+.parent-analytics__insight-card,
+.player-analytics__insight-card,
+.parent-analytics__feedback-card {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    display: flex;
+    gap: var(--space-3);
+    transition: transform var(--transition-fast);
+}
+
+.coach-analytics__insight-card:hover,
+.parent-analytics__insight-card:hover,
+.player-analytics__insight-card:hover,
+.parent-analytics__feedback-card:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.coach-analytics__insight-icon,
+.parent-analytics__insight-icon,
+.player-analytics__insight-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.coach-analytics__insight-content,
+.parent-analytics__insight-content,
+.player-analytics__insight-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.coach-analytics__insight-content h5,
+.parent-analytics__insight-content h5,
+.player-analytics__insight-content h5 {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+    margin: 0 0 var(--space-1) 0;
+}
+
+.coach-analytics__insight-content p,
+.parent-analytics__insight-content p,
+.player-analytics__insight-content p {
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Feedback Cards */
+.parent-analytics__feedback-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-2);
+}
+
+.parent-analytics__feedback-header h5 {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+    margin: 0;
+}
+
+.parent-analytics__feedback-date {
+    font-size: var(--font-size-xs);
+    color: var(--gray-500);
+}
+
+.parent-analytics__feedback-content {
+    margin-top: var(--space-2);
+}
+
+.parent-analytics__feedback-rating {
+    margin-bottom: var(--space-2);
+}
+
+.parent-analytics__feedback-rating .filled {
+    color: var(--lion-primary);
+}
+
+.parent-analytics__feedback-rating .empty {
+    color: var(--gray-300);
+}
+
+/* Skill Categories */
+.parent-analytics__skill-categories,
+.player-analytics__skill-categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+}
+
+.parent-analytics__skill-category,
+.player-analytics__skill-category {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+}
+
+.parent-analytics__skill-category h4,
+.player-analytics__skill-category h4 {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+    margin: 0 0 var(--space-3) 0;
+    text-align: center;
+}
+
+.parent-analytics__skill-bars,
+.player-analytics__skill-bars {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.parent-analytics__skill-bar,
+.player-analytics__skill-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--font-size-sm);
+}
+
+.parent-analytics__skill-name,
+.player-analytics__skill-name {
+    min-width: 120px;
+    font-weight: var(--font-weight-medium);
+    color: var(--gray-700);
+}
+
+.parent-analytics__skill-progress,
+.player-analytics__skill-progress {
+    flex: 1;
+    height: 8px;
+    background: var(--gray-200);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.parent-analytics__skill-fill,
+.player-analytics__skill-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--lion-primary) 0%, var(--lion-secondary) 100%);
+    border-radius: var(--radius-full);
+    transition: width var(--transition-slow);
+}
+
+.parent-analytics__skill-level,
+.player-analytics__skill-level {
+    min-width: 40px;
+    text-align: right;
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+}
+
+/* Attendance and Statistics */
+.parent-analytics__attendance-stats,
+.player-analytics__goal-stats {
+    background: var(--gray-50);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    margin-top: var(--space-6);
+}
+
+.parent-analytics__attendance-stats h4,
+.player-analytics__goal-stats h4 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-4);
+    text-align: center;
+}
+
+.parent-analytics__stats-grid,
+.player-analytics__stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-3);
+}
+
+.parent-analytics__stat-item,
+.player-analytics__stat-item {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.parent-analytics__stat-label,
+.player-analytics__stat-label {
+    font-size: var(--font-size-xs);
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: var(--font-weight-semibold);
+}
+
+.parent-analytics__stat-value,
+.player-analytics__stat-value {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--lion-primary);
+}
+
+/* Comparison Styles */
+.parent-analytics__comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+}
+
+.parent-analytics__comparison-item {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+}
+
+.parent-analytics__comparison-metric h5 {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+    margin: 0 0 var(--space-3) 0;
+    text-align: center;
+}
+
+.parent-analytics__comparison-bars {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.parent-analytics__comparison-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--font-size-sm);
+}
+
+.parent-analytics__comparison-bar span:first-child {
+    min-width: 100px;
+    font-weight: var(--font-weight-medium);
+    color: var(--gray-700);
+}
+
+.parent-analytics__comparison-bar span:last-child {
+    min-width: 50px;
+    text-align: right;
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+}
+
+.parent-analytics__bar-container {
+    flex: 1;
+    height: 20px;
+    background: var(--gray-200);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.parent-analytics__bar {
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width var(--transition-slow);
+}
+
+.parent-analytics__bar--child {
+    background: linear-gradient(90deg, var(--lion-primary) 0%, var(--lion-secondary) 100%);
+}
+
+.parent-analytics__bar--peer {
+    background: var(--gray-400);
+}
+
+.parent-analytics__percentile {
+    font-size: var(--font-size-xs);
+    color: var(--gray-600);
+    text-align: center;
+    margin-top: var(--space-2);
+    font-style: italic;
+}
+
+/* Achievement Timeline */
+.parent-analytics__achievement-timeline,
+.player-analytics__milestones {
+    margin-top: var(--space-4);
+}
+
+.parent-analytics__timeline,
+.player-analytics__milestones-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.parent-analytics__timeline-item,
+.player-analytics__milestone-item {
+    display: flex;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    border-left: 4px solid var(--lion-primary);
+}
+
+.parent-analytics__timeline-date {
+    min-width: 80px;
+    font-size: var(--font-size-xs);
+    color: var(--gray-600);
+    font-weight: var(--font-weight-semibold);
+    background: var(--gray-100);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-md);
+    text-align: center;
+    align-self: flex-start;
+}
+
+.parent-analytics__timeline-content,
+.player-analytics__milestone-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.parent-analytics__achievement-icon,
+.player-analytics__milestone-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.parent-analytics__achievement-details {
+    margin-left: var(--space-2);
+}
+
+.parent-analytics__achievement-details h4,
+.player-analytics__milestone-content h5 {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+    margin: 0 0 var(--space-1) 0;
+}
+
+.parent-analytics__achievement-details p,
+.player-analytics__milestone-content p {
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    margin: 0 0 var(--space-2) 0;
+    line-height: 1.4;
+}
+
+.parent-analytics__achievement-level {
+    display: inline-block;
+    background: var(--lion-primary-light);
+    color: var(--lion-primary);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+}
+
+.player-analytics__milestone-progress {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+.player-analytics__progress-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--gray-200);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.player-analytics__progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--lion-primary) 0%, var(--lion-secondary) 100%);
+    border-radius: var(--radius-full);
+    transition: width var(--transition-slow);
+}
+
+/* Team Impact and Encouragement */
+.player-analytics__team-impact,
+.player-analytics__encouragement {
+    margin-top: var(--space-6);
+}
+
+.player-analytics__team-impact h4,
+.player-analytics__encouragement h4 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-4);
+    text-align: center;
+}
+
+.player-analytics__impact-cards,
+.player-analytics__encouragement-messages {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-3);
+}
+
+.player-analytics__impact-card,
+.player-analytics__encouragement-card {
+    background: linear-gradient(135deg, var(--lion-primary-light) 0%, var(--white) 100%);
+    border: 1px solid var(--lion-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    display: flex;
+    gap: var(--space-3);
+    transition: transform var(--transition-fast);
+}
+
+.player-analytics__impact-card:hover,
+.player-analytics__encouragement-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.player-analytics__impact-icon,
+.player-analytics__encouragement-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.player-analytics__impact-content,
+.player-analytics__encouragement-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.player-analytics__impact-content h5,
+.player-analytics__encouragement-content h5 {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+    margin: 0 0 var(--space-2) 0;
+}
+
+.player-analytics__impact-content p,
+.player-analytics__encouragement-content p {
+    font-size: var(--font-size-sm);
+    color: var(--gray-700);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Formation and Results */
+.coach-analytics__formation-section,
+.coach-analytics__match-summary {
+    margin-top: var(--space-6);
+}
+
+.coach-analytics__formation-section h4,
+.coach-analytics__match-summary h4 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-4);
+    text-align: center;
+}
+
+.coach-analytics__results-grid {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-6);
+    margin-top: var(--space-4);
+}
+
+.coach-analytics__result-card {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    text-align: center;
+    min-width: 100px;
+    box-shadow: var(--shadow-sm);
+}
+
+.coach-analytics__result-card--wins {
+    border-left: 4px solid var(--success);
+}
+
+.coach-analytics__result-card--draws {
+    border-left: 4px solid var(--warning);
+}
+
+.coach-analytics__result-card--losses {
+    border-left: 4px solid var(--error);
+}
+
+.coach-analytics__result-number {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--gray-900);
+    line-height: 1;
+}
+
+.coach-analytics__result-label {
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: var(--font-weight-semibold);
+    margin-top: var(--space-1);
+}
+
+/* Training Insights */
+.coach-analytics__training-insights {
+    margin-top: var(--space-6);
+}
+
+.coach-analytics__training-insights h4 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-4);
+    text-align: center;
+}
+
+/* Milestones */
+.coach-analytics__milestones {
+    background: var(--gray-50);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    margin-top: var(--space-6);
+}
+
+.coach-analytics__milestones h4 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-4);
+    text-align: center;
+}
+
+.coach-analytics__milestones-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.coach-analytics__milestone-item {
+    display: flex;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    align-items: center;
+}
+
+.coach-analytics__milestone-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.coach-analytics__milestone-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.coach-analytics__milestone-content h5 {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+    margin: 0 0 var(--space-1) 0;
+}
+
+.coach-analytics__milestone-content p {
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    margin: 0 0 var(--space-1) 0;
+    line-height: 1.4;
+}
+
+.coach-analytics__milestone-date {
+    font-size: var(--font-size-xs);
+    color: var(--gray-500);
+    font-style: italic;
+}
+
+.coach-analytics__milestone-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+    min-width: 80px;
+}
+
+.coach-analytics__progress-bar {
+    width: 60px;
+    height: 6px;
+    background: var(--gray-200);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.coach-analytics__progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--lion-primary) 0%, var(--lion-secondary) 100%);
+    border-radius: var(--radius-full);
+    transition: width var(--transition-slow);
+}
+
+.coach-analytics__progress-text {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-700);
+}
+
+/* Empty States */
+.coach-analytics__empty-state,
+.parent-analytics__empty-state,
+.player-analytics__empty-state {
+    text-align: center;
+    padding: var(--space-6);
+    color: var(--gray-500);
+    font-style: italic;
+}
+
+.parent-analytics__empty-icon,
+.player-analytics__empty-icon {
+    font-size: 3rem;
+    margin-bottom: var(--space-2);
+    opacity: 0.5;
+}
+
+/* Responsive Design */
+@media (max-width: 1199px) {
+    .coach-analytics__charts-grid,
+    .parent-analytics__charts-grid,
+    .player-analytics__charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .coach-analytics__metrics-grid,
+    .parent-analytics__metrics-grid,
+    .player-analytics__achievement-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 1023px) {
+    .coach-analytics,
+    .parent-analytics,
+    .player-analytics {
+        padding: var(--space-3);
+    }
+
+    .coach-analytics__header-content,
+    .parent-analytics__header-content,
+    .player-analytics__header-content {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .coach-analytics__header-actions,
+    .parent-analytics__header-actions,
+    .player-analytics__header-actions {
+        justify-content: stretch;
+    }
+
+    .parent-analytics__child-info,
+    .player-analytics__player-info {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--space-3);
+    }
+
+    .parent-analytics__child-stats,
+    .player-analytics__player-stats {
+        justify-content: center;
+    }
+
+    .coach-analytics__results-grid {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-3);
+    }
+
+    .parent-analytics__skill-categories,
+    .player-analytics__skill-categories {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 767px) {
+    .coach-analytics__title h1,
+    .parent-analytics__title h1,
+    .player-analytics__title h1 {
+        font-size: var(--font-size-2xl);
+    }
+
+    .coach-analytics__metrics-grid,
+    .parent-analytics__metrics-grid,
+    .player-analytics__achievement-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .coach-analytics__metric-card,
+    .parent-analytics__metric-card,
+    .player-analytics__achievement-card {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--space-2);
+    }
+
+    .coach-analytics__metric-icon,
+    .parent-analytics__metric-icon,
+    .player-analytics__achievement-icon {
+        align-self: center;
+    }
+
+    .coach-analytics__table-wrapper,
+    .player-analytics__table-wrapper {
+        font-size: var(--font-size-xs);
+    }
+
+    .coach-analytics__insights-grid,
+    .parent-analytics__insights-grid,
+    .player-analytics__insights-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .parent-analytics__stats-grid,
+    .player-analytics__stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .player-analytics__impact-cards,
+    .player-analytics__encouragement-messages {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .coach-analytics__header-actions,
+    .parent-analytics__header-actions,
+    .player-analytics__header-actions {
+        display: none;
+    }
+
+    .coach-analytics,
+    .parent-analytics,
+    .player-analytics {
+        padding: 0;
+        background: none;
+    }
+
+    .coach-analytics__metric-card:hover,
+    .parent-analytics__metric-card:hover,
+    .player-analytics__achievement-card:hover {
+        transform: none;
+        box-shadow: none;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .coach-analytics__metric-card,
+    .parent-analytics__metric-card,
+    .player-analytics__achievement-card,
+    .coach-analytics__insight-card,
+    .parent-analytics__insight-card,
+    .player-analytics__insight-card {
+        border-width: 2px;
+    }
+
+    .coach-analytics__table,
+    .player-analytics__table {
+        border: 2px solid var(--gray-900);
+    }
+}

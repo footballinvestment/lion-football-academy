@@ -46,6 +46,17 @@ class Player {
         return await db.query(sql, [teamId]);
     }
 
+    static async findByUserId(userId) {
+        const sql = `
+            SELECT p.*, t.name as team_name 
+            FROM players p 
+            LEFT JOIN teams t ON p.team_id = t.id 
+            WHERE p.user_id = ?
+        `;
+        const results = await db.query(sql, [userId]);
+        return results[0] || null;
+    }
+
     static async update(id, playerData) {
         const { 
             name, birth_date, position, dominant_foot, team_id,

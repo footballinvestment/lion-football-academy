@@ -1,0 +1,363 @@
+.qr-code-card {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.qr-code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.qr-code-header h3 {
+    margin: 0;
+    color: #2c5530;
+    font-size: 1.25rem;
+}
+
+.qr-code-countdown {
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+    border: 1px solid currentColor;
+}
+
+.qr-code-loading {
+    text-align: center;
+    padding: 2rem;
+}
+
+.qr-code-loading p {
+    margin-top: 1rem;
+    color: #6b7280;
+}
+
+.qr-code-retry {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.qr-code-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.qr-code-display {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+.qr-code-image-container {
+    position: relative;
+    display: inline-block;
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    border: 2px solid #e5e7eb;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.qr-code-image {
+    display: block;
+    border-radius: 8px;
+}
+
+.qr-code-expired-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(239, 68, 68, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    color: white;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.qr-code-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f4f6;
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+.qr-code-info {
+    display: grid;
+    gap: 1rem;
+}
+
+.player-info {
+    text-align: center;
+    padding: 1rem;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    border-radius: 8px;
+    border: 1px solid #22c55e;
+}
+
+.player-info h4 {
+    margin: 0 0 0.5rem 0;
+    color: #15803d;
+    font-size: 1.125rem;
+}
+
+.player-info p {
+    margin: 0;
+    color: #16a34a;
+    font-weight: 500;
+}
+
+.session-info {
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.session-info p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    color: #475569;
+}
+
+.session-info strong {
+    color: #334155;
+}
+
+.qr-code-instructions {
+    padding: 1rem;
+    background: #fef7cd;
+    border: 1px solid #fde047;
+    border-radius: 8px;
+}
+
+.qr-code-instructions h5 {
+    margin: 0 0 0.75rem 0;
+    color: #92400e;
+    font-size: 1rem;
+}
+
+.qr-code-instructions ol {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: #a16207;
+    line-height: 1.6;
+}
+
+.qr-code-instructions li {
+    margin-bottom: 0.25rem;
+}
+
+.qr-code-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.qr-code-main-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.qr-code-download-options {
+    text-align: center;
+}
+
+.qr-code-download-options h6 {
+    margin: 0 0 0.5rem 0;
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.download-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.qr-code-metadata {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+    text-align: center;
+}
+
+.qr-code-metadata small {
+    color: #9ca3af;
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+    .qr-code-card {
+        margin: 0;
+    }
+    
+    .qr-code-header {
+        text-align: center;
+        flex-direction: column;
+    }
+    
+    .qr-code-header h3 {
+        font-size: 1.125rem;
+    }
+    
+    .qr-code-countdown {
+        font-size: 0.8rem;
+        padding: 0.2rem 0.6rem;
+    }
+    
+    .qr-code-image-container {
+        padding: 0.75rem;
+    }
+    
+    .qr-code-info {
+        gap: 0.75rem;
+    }
+    
+    .player-info,
+    .session-info,
+    .qr-code-instructions {
+        padding: 0.75rem;
+    }
+    
+    .qr-code-main-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .qr-code-main-actions button {
+        width: 100%;
+        max-width: 200px;
+    }
+    
+    .download-buttons {
+        gap: 0.375rem;
+    }
+    
+    .download-buttons button {
+        flex: 1;
+        min-width: 60px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .qr-code-header h3 {
+        color: #4ade80;
+    }
+    
+    .qr-code-image-container {
+        background: #1f2937;
+        border-color: #374151;
+    }
+    
+    .player-info {
+        background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+        border-color: #059669;
+    }
+    
+    .player-info h4 {
+        color: #6ee7b7;
+    }
+    
+    .player-info p {
+        color: #86efac;
+    }
+    
+    .session-info {
+        background: #1e293b;
+        border-color: #475569;
+    }
+    
+    .session-info p {
+        color: #cbd5e1;
+    }
+    
+    .session-info strong {
+        color: #f1f5f9;
+    }
+    
+    .qr-code-instructions {
+        background: #451a03;
+        border-color: #92400e;
+    }
+    
+    .qr-code-instructions h5 {
+        color: #fbbf24;
+    }
+    
+    .qr-code-instructions ol {
+        color: #fde047;
+    }
+    
+    .qr-code-metadata {
+        border-color: #374151;
+    }
+    
+    .qr-code-metadata small {
+        color: #6b7280;
+    }
+}
+
+/* Animation for QR code refresh */
+.qr-code-image {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.qr-code-image-container.loading .qr-code-image {
+    opacity: 0.5;
+}
+
+/* Pulse animation for countdown when low */
+.qr-code-countdown.text-red-600 {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Success animation for copy action */
+.qr-code-main-actions button.copied {
+    background-color: #10b981;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+/* Hover effects */
+.qr-code-image-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+.download-buttons button:hover {
+    transform: translateY(-1px);
+    transition: transform 0.2s ease;
+}

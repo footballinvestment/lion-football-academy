@@ -1,0 +1,610 @@
+.coach-qr-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+    margin-bottom: 1rem;
+}
+
+.header-content h1 {
+    margin: 0 0 0.5rem 0;
+    color: #2c5530;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.header-content p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 1.125rem;
+    line-height: 1.6;
+}
+
+.coach-info {
+    text-align: right;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #f59e0b;
+    border-radius: 12px;
+    min-width: 250px;
+}
+
+.coach-info h3 {
+    margin: 0 0 0.5rem 0;
+    color: #92400e;
+    font-size: 1.25rem;
+}
+
+.coach-info p {
+    margin: 0 0 0.25rem 0;
+    color: #a16207;
+    font-weight: 500;
+}
+
+.coach-info p:last-child {
+    margin-bottom: 0;
+}
+
+.qr-tabs {
+    display: flex;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    box-shadow: 0 1px 3px -1px rgba(0, 0, 0, 0.1);
+}
+
+.tab {
+    flex: 1;
+    padding: 1.25rem 2rem;
+    background: none;
+    border: none;
+    font-weight: 600;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-right: 1px solid #e5e7eb;
+    font-size: 1rem;
+}
+
+.tab:last-child {
+    border-right: none;
+}
+
+.tab:hover {
+    background: #f9fafb;
+    color: #374151;
+}
+
+.tab.active {
+    background: #2c5530;
+    color: white;
+}
+
+.qr-content {
+    min-height: 600px;
+}
+
+.attendance-tab,
+.history-tab {
+    width: 100%;
+}
+
+.coach-attendance-manager,
+.coach-history {
+    margin: 0;
+}
+
+.instructions-tab {
+    width: 100%;
+}
+
+.instructions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.instruction-card {
+    height: fit-content;
+}
+
+.instruction-card.scanner {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    border: 1px solid #22c55e;
+}
+
+.instruction-card.troubleshooting {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #f59e0b;
+}
+
+.instruction-card.manual {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 1px solid #3b82f6;
+}
+
+.instruction-card.security {
+    background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+    border: 1px solid #f87171;
+}
+
+.instruction-card.export {
+    background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+    border: 1px solid #a855f7;
+}
+
+.instruction-card.contact {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    border: 1px solid #0ea5e9;
+}
+
+.card-header {
+    margin-bottom: 1.5rem;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.instruction-card.scanner .card-header h3 {
+    color: #15803d;
+}
+
+.instruction-card.troubleshooting .card-header h3 {
+    color: #92400e;
+}
+
+.instruction-card.manual .card-header h3 {
+    color: #1e40af;
+}
+
+.instruction-card.security .card-header h3 {
+    color: #991b1b;
+}
+
+.instruction-card.export .card-header h3 {
+    color: #7c3aed;
+}
+
+.instruction-card.contact .card-header h3 {
+    color: #0369a1;
+}
+
+.card-content {
+    line-height: 1.6;
+}
+
+.instruction-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.step {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.step-number {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: #22c55e;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.step-text h4 {
+    margin: 0 0 0.5rem 0;
+    color: #15803d;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.step-text p {
+    margin: 0;
+    color: #16a34a;
+    font-size: 0.875rem;
+}
+
+.troubleshoot-item {
+    margin-bottom: 1.5rem;
+}
+
+.troubleshoot-item:last-child {
+    margin-bottom: 0;
+}
+
+.troubleshoot-item h4 {
+    margin: 0 0 0.75rem 0;
+    color: #92400e;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.troubleshoot-item ul {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: #a16207;
+}
+
+.troubleshoot-item li {
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.manual-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.manual-step h4 {
+    margin: 0 0 0.5rem 0;
+    color: #1e40af;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.manual-step p {
+    margin: 0;
+    color: #1d4ed8;
+    font-size: 0.875rem;
+}
+
+.manual-step ul {
+    margin: 0.5rem 0 0 0;
+    padding-left: 1.25rem;
+    color: #1d4ed8;
+}
+
+.manual-step li {
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.manual-step strong {
+    color: #1e40af;
+}
+
+.security-features {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.security-feature h4 {
+    margin: 0 0 0.5rem 0;
+    color: #991b1b;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.security-feature p {
+    margin: 0;
+    color: #b91c1c;
+    font-size: 0.875rem;
+}
+
+.export-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.export-option h4 {
+    margin: 0 0 0.5rem 0;
+    color: #7c3aed;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.export-option p {
+    margin: 0;
+    color: #8b5cf6;
+    font-size: 0.875rem;
+}
+
+.support-info p {
+    margin: 0 0 1rem 0;
+    color: #0284c7;
+    font-weight: 500;
+}
+
+.support-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.support-option h4 {
+    margin: 0 0 0.25rem 0;
+    color: #0369a1;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.support-option p {
+    margin: 0;
+    color: #0284c7;
+    font-size: 0.75rem;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .coach-qr-page {
+        padding: 1rem;
+        gap: 1.5rem;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .header-content h1 {
+        font-size: 1.75rem;
+    }
+    
+    .header-content p {
+        font-size: 1rem;
+    }
+    
+    .coach-info {
+        text-align: center;
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .qr-tabs {
+        flex-direction: column;
+    }
+    
+    .tab {
+        border-right: none;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1rem;
+    }
+    
+    .tab:last-child {
+        border-bottom: none;
+    }
+    
+    .instructions-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .step {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
+    
+    .step-number {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .header-content h1 {
+        color: #4ade80;
+    }
+    
+    .header-content p {
+        color: #d1d5db;
+    }
+    
+    .coach-info {
+        background: linear-gradient(135deg, #451a03 0%, #78350f 100%);
+        border-color: #92400e;
+    }
+    
+    .coach-info h3 {
+        color: #fbbf24;
+    }
+    
+    .coach-info p {
+        color: #fde047;
+    }
+    
+    .qr-tabs {
+        background: #1f2937;
+        border-color: #374151;
+    }
+    
+    .tab {
+        color: #d1d5db;
+        border-color: #374151;
+    }
+    
+    .tab:hover {
+        background: #374151;
+        color: #f3f4f6;
+    }
+    
+    .tab.active {
+        background: #4ade80;
+        color: #064e3b;
+    }
+    
+    .instruction-card.scanner {
+        background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+        border-color: #059669;
+    }
+    
+    .instruction-card.troubleshooting {
+        background: linear-gradient(135deg, #451a03 0%, #78350f 100%);
+        border-color: #92400e;
+    }
+    
+    .instruction-card.manual {
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+        border-color: #3b82f6;
+    }
+    
+    .instruction-card.security {
+        background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+        border-color: #dc2626;
+    }
+    
+    .instruction-card.export {
+        background: linear-gradient(135deg, #581c87 0%, #6b21a8 100%);
+        border-color: #a855f7;
+    }
+    
+    .instruction-card.contact {
+        background: linear-gradient(135deg, #0c4a6e 0%, #075985 100%);
+        border-color: #0ea5e9;
+    }
+    
+    .instruction-card.scanner .card-header h3 {
+        color: #6ee7b7;
+    }
+    
+    .instruction-card.troubleshooting .card-header h3 {
+        color: #fbbf24;
+    }
+    
+    .instruction-card.manual .card-header h3 {
+        color: #93c5fd;
+    }
+    
+    .instruction-card.security .card-header h3 {
+        color: #fca5a5;
+    }
+    
+    .instruction-card.export .card-header h3 {
+        color: #c4b5fd;
+    }
+    
+    .instruction-card.contact .card-header h3 {
+        color: #7dd3fc;
+    }
+    
+    .step-text h4 {
+        color: #6ee7b7;
+    }
+    
+    .step-text p {
+        color: #86efac;
+    }
+    
+    .troubleshoot-item h4 {
+        color: #fbbf24;
+    }
+    
+    .troubleshoot-item ul {
+        color: #fde047;
+    }
+    
+    .manual-step h4 {
+        color: #93c5fd;
+    }
+    
+    .manual-step p,
+    .manual-step ul {
+        color: #bfdbfe;
+    }
+    
+    .manual-step strong {
+        color: #93c5fd;
+    }
+    
+    .security-feature h4 {
+        color: #fca5a5;
+    }
+    
+    .security-feature p {
+        color: #fecaca;
+    }
+    
+    .export-option h4 {
+        color: #c4b5fd;
+    }
+    
+    .export-option p {
+        color: #ddd6fe;
+    }
+    
+    .support-info p {
+        color: #7dd3fc;
+    }
+    
+    .support-option h4 {
+        color: #7dd3fc;
+    }
+    
+    .support-option p {
+        color: #bae6fd;
+    }
+}
+
+/* Animations */
+.instructions-grid > * {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.instruction-card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.instruction-card:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.instruction-card:nth-child(4) {
+    animation-delay: 0.3s;
+}
+
+.instruction-card:nth-child(5) {
+    animation-delay: 0.4s;
+}
+
+.instruction-card:nth-child(6) {
+    animation-delay: 0.5s;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Hover effects */
+.instruction-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+.step:hover .step-number {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}

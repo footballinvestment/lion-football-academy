@@ -1,0 +1,540 @@
+.qr-scanner {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.qr-scanner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.qr-scanner-header h3 {
+    margin: 0;
+    color: #2c5530;
+    font-size: 1.25rem;
+}
+
+.scanner-status {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.status-scanning {
+    color: #dc2626;
+    animation: pulse 2s infinite;
+}
+
+.status-ready {
+    color: #16a34a;
+}
+
+.status-no-camera {
+    color: #f59e0b;
+}
+
+.qr-scanner-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Camera Section */
+.camera-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.camera-container {
+    position: relative;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 4/3;
+    max-width: 100%;
+}
+
+.camera-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.camera-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.scanner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.scanner-frame {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    border: 2px solid transparent;
+}
+
+.scanner-corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #22c55e;
+}
+
+.scanner-corner.tl {
+    top: 0;
+    left: 0;
+    border-right: none;
+    border-bottom: none;
+}
+
+.scanner-corner.tr {
+    top: 0;
+    right: 0;
+    border-left: none;
+    border-bottom: none;
+}
+
+.scanner-corner.bl {
+    bottom: 0;
+    left: 0;
+    border-right: none;
+    border-top: none;
+}
+
+.scanner-corner.br {
+    bottom: 0;
+    right: 0;
+    border-left: none;
+    border-top: none;
+}
+
+.scanner-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #22c55e, transparent);
+    animation: scanLine 2s linear infinite;
+}
+
+@keyframes scanLine {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(246px);
+        opacity: 0;
+    }
+}
+
+.scanner-instruction {
+    margin-top: 2rem;
+    color: white;
+    text-align: center;
+    font-weight: 500;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.scanner-processing {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+}
+
+.scanner-processing p {
+    margin-top: 1rem;
+    font-weight: 500;
+}
+
+.camera-controls {
+    display: flex;
+    justify-content: center;
+}
+
+/* No Camera Section */
+.no-camera-section {
+    text-align: center;
+    padding: 2rem;
+    background: #fef3c7;
+    border: 1px solid #fbbf24;
+    border-radius: 8px;
+}
+
+.no-camera-message h4 {
+    margin: 0 0 1rem 0;
+    color: #92400e;
+}
+
+.no-camera-message p {
+    margin: 0;
+    color: #a16207;
+    line-height: 1.6;
+}
+
+/* Manual Input Section */
+.manual-input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+}
+
+.manual-input-form {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.manual-input-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 0.875rem;
+    resize: vertical;
+    min-height: 80px;
+}
+
+.manual-input-textarea:focus {
+    outline: none;
+    border-color: #2c5530;
+    box-shadow: 0 0 0 3px rgba(44, 85, 48, 0.1);
+}
+
+.input-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+/* Scan History */
+.scan-history {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.history-header h4 {
+    margin: 0;
+    color: #334155;
+    font-size: 1rem;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.history-item.success {
+    border-left: 4px solid #22c55e;
+}
+
+.history-item.error {
+    border-left: 4px solid #ef4444;
+}
+
+.history-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.player-name {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.team-name {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.scan-time {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.history-status {
+    display: flex;
+    align-items: center;
+}
+
+.status-success {
+    font-size: 1.25rem;
+}
+
+.status-error {
+    font-size: 1.25rem;
+    cursor: help;
+}
+
+.qr-scanner-info {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+    text-align: center;
+}
+
+.qr-scanner-info small {
+    color: #9ca3af;
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+    .qr-scanner {
+        margin: 0;
+    }
+    
+    .qr-scanner-header {
+        text-align: center;
+        flex-direction: column;
+    }
+    
+    .qr-scanner-header h3 {
+        font-size: 1.125rem;
+    }
+    
+    .camera-container {
+        aspect-ratio: 1;
+    }
+    
+    .scanner-frame {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .scanner-corner {
+        width: 15px;
+        height: 15px;
+        border-width: 2px;
+    }
+    
+    .scanner-instruction {
+        font-size: 0.875rem;
+        margin-top: 1.5rem;
+    }
+    
+    .manual-input-form {
+        max-width: none;
+    }
+    
+    .input-actions {
+        flex-direction: column;
+    }
+    
+    .input-actions button {
+        width: 100%;
+    }
+    
+    .history-item {
+        padding: 0.5rem;
+    }
+    
+    .history-info {
+        min-width: 0;
+        flex: 1;
+    }
+    
+    .player-name,
+    .team-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .qr-scanner-header h3 {
+        color: #4ade80;
+    }
+    
+    .scanner-corner {
+        border-color: #4ade80;
+    }
+    
+    .scanner-line {
+        background: linear-gradient(90deg, transparent, #4ade80, transparent);
+    }
+    
+    .no-camera-section {
+        background: #451a03;
+        border-color: #92400e;
+    }
+    
+    .no-camera-message h4 {
+        color: #fbbf24;
+    }
+    
+    .no-camera-message p {
+        color: #fde047;
+    }
+    
+    .manual-input-textarea {
+        background: #1f2937;
+        border-color: #374151;
+        color: #f9fafb;
+    }
+    
+    .manual-input-textarea:focus {
+        border-color: #4ade80;
+        box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.1);
+    }
+    
+    .scan-history {
+        background: #1e293b;
+        border-color: #475569;
+    }
+    
+    .history-header h4 {
+        color: #f1f5f9;
+    }
+    
+    .history-item {
+        background: #334155;
+        border-color: #475569;
+    }
+    
+    .player-name {
+        color: #f1f5f9;
+    }
+    
+    .team-name {
+        color: #cbd5e1;
+    }
+    
+    .scan-time {
+        color: #94a3b8;
+    }
+    
+    .qr-scanner-info {
+        border-color: #374151;
+    }
+    
+    .qr-scanner-info small {
+        color: #6b7280;
+    }
+}
+
+/* Accessibility improvements */
+.scanner-frame:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 4px;
+}
+
+.history-item:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+}
+
+/* Animation for successful scan */
+.history-item.success {
+    animation: slideInSuccess 0.5s ease-out;
+}
+
+.history-item.error {
+    animation: slideInError 0.5s ease-out;
+}
+
+@keyframes slideInSuccess {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInError {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Loading state for camera */
+.camera-container.loading {
+    background: linear-gradient(45deg, #f3f4f6 25%, transparent 25%), 
+                linear-gradient(-45deg, #f3f4f6 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #f3f4f6 75%), 
+                linear-gradient(-45deg, transparent 75%, #f3f4f6 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    animation: loading-stripes 1s linear infinite;
+}
+
+@keyframes loading-stripes {
+    0% {
+        background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+    100% {
+        background-position: 20px 20px, 20px 30px, 30px 10px, 10px 20px;
+    }
+}

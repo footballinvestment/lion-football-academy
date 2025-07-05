@@ -18,13 +18,13 @@ async function seedAdminUser() {
 
         // Insert admin user
         await db.run(
-            `INSERT INTO users (username, email, password_hash, full_name, role, active, created_at, updated_at) 
+            `INSERT INTO users (email, password_hash, first_name, last_name, role, is_active, created_at, updated_at) 
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             [
-                'admin',
-                'admin@lionacademy.hu',
+                'admin@lionfa.com',
                 hashedPassword,
-                'System Administrator',
+                'System',
+                'Administrator',
                 'admin',
                 true,
                 new Date().toISOString(),
@@ -34,7 +34,7 @@ async function seedAdminUser() {
 
         console.log('✅ Admin user created successfully');
         console.log('   Username: admin');
-        console.log('   Email: admin@lionacademy.hu');
+        console.log('   Email: admin@lionfa.com');
         console.log('   Password: admin123');
         console.log('   Role: admin');
 

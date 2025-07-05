@@ -1,0 +1,176 @@
+/* Responsive Navbar Layout */
+.responsive-navbar {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Desktop Layout */
+@media (min-width: 1024px) {
+    .responsive-navbar {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+    
+    .responsive-navbar .navbar {
+        width: 100%;
+        z-index: var(--z-fixed);
+    }
+    
+    .responsive-navbar .sidebar {
+        position: fixed;
+        top: var(--navbar-height);
+        left: 0;
+        height: calc(100vh - var(--navbar-height));
+        width: var(--sidebar-width);
+        transform: translateX(0);
+        border-right: 1px solid var(--gray-200);
+        background-color: var(--white);
+        z-index: var(--z-sidebar);
+    }
+    
+    .responsive-navbar .mobile-nav {
+        display: none;
+    }
+    
+    /* Adjust main content for desktop sidebar */
+    .responsive-navbar ~ .main-content {
+        margin-left: var(--sidebar-width);
+        padding-top: var(--navbar-height);
+        min-height: calc(100vh - var(--navbar-height));
+    }
+}
+
+/* Tablet Layout */
+@media (max-width: 1023px) and (min-width: 768px) {
+    .responsive-navbar {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+    
+    .responsive-navbar .navbar {
+        width: 100%;
+        z-index: var(--z-fixed);
+    }
+    
+    .responsive-navbar .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: var(--sidebar-width);
+        transform: translateX(-100%);
+        transition: transform var(--transition-base);
+        z-index: var(--z-overlay);
+        box-shadow: var(--shadow-xl);
+    }
+    
+    .responsive-navbar .sidebar--open {
+        transform: translateX(0);
+    }
+    
+    .responsive-navbar .mobile-nav {
+        display: block;
+    }
+    
+    /* Adjust main content for tablet */
+    .responsive-navbar ~ .main-content {
+        padding-top: var(--navbar-height);
+        padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
+        min-height: calc(100vh - var(--navbar-height) - var(--mobile-nav-height));
+    }
+}
+
+/* Mobile Layout */
+@media (max-width: 767px) {
+    .responsive-navbar {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+    
+    .responsive-navbar .navbar {
+        width: 100%;
+        z-index: var(--z-fixed);
+        height: 3.5rem;
+    }
+    
+    .responsive-navbar .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 100%;
+        max-width: 320px;
+        transform: translateX(-100%);
+        transition: transform var(--transition-base);
+        z-index: var(--z-overlay);
+        box-shadow: var(--shadow-xl);
+    }
+    
+    .responsive-navbar .sidebar--open {
+        transform: translateX(0);
+    }
+    
+    .responsive-navbar .mobile-nav {
+        display: block;
+    }
+    
+    /* Adjust main content for mobile */
+    .responsive-navbar ~ .main-content {
+        padding-top: 3.5rem;
+        padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
+        min-height: calc(100vh - 3.5rem - var(--mobile-nav-height));
+    }
+}
+
+/* Prevent scrolling when sidebar is open on mobile */
+@media (max-width: 1023px) {
+    .responsive-navbar .sidebar--open ~ body {
+        overflow: hidden;
+    }
+}
+
+/* Smooth transitions */
+.responsive-navbar * {
+    transition: transform var(--transition-base), opacity var(--transition-base);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .responsive-navbar *,
+    .responsive-navbar .sidebar {
+        transition: none;
+    }
+}
+
+/* Print styles */
+@media print {
+    .responsive-navbar {
+        display: none;
+    }
+    
+    .responsive-navbar ~ .main-content {
+        margin-left: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .responsive-navbar .sidebar {
+        border-right-width: 2px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .responsive-navbar .sidebar {
+        background-color: var(--gray-900);
+        border-right-color: var(--gray-700);
+    }
+}

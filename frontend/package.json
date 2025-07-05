@@ -34,7 +34,7 @@
   },
   "proxy": "http://localhost:5001",
   "scripts": {
-    "start": "craco start",
+    "start": "FAST_REFRESH=false craco start",
     "build": "cross-env GENERATE_SOURCEMAP=false craco build",
     "build:analyze": "cross-env GENERATE_SOURCEMAP=false craco build && npx webpack-bundle-analyzer build/static/js/*.js",
     "build:dev": "cross-env GENERATE_SOURCEMAP=true craco build",

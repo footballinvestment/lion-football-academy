@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// Base URL configuration - updated to port 5001
+// Base URL configuration - updated to port 5001  
 const BASE_URL = 'http://localhost:5001/api';
 
 // Create axios instance with default configuration
@@ -13,6 +13,36 @@ const api = axios.create({
     }
 });
 
+// Token refresh function
+const refreshAuthToken = async () => {
+    try {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) {
+            throw new Error('No refresh token available');
+        }
+        
+        const response = await axios.post(`${BASE_URL}/auth/refresh`, {
+            refreshToken
+        });
+        
+        const { token, refreshToken: newRefreshToken } = response.data;
+        localStorage.setItem('token', token);
+        if (newRefreshToken) {
+            localStorage.setItem('refreshToken', newRefreshToken);
+        }
+        
+        return token;
+    } catch (error) {
+        // Clear tokens if refresh fails
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        // Redirect to login
+        window.location.href = '/login';
+        throw error;
+    }
+};
+
 // Request interceptor for adding auth token and logging
 api.interceptors.request.use(
     (config) => {
@@ -20,6 +50,10 @@ api.interceptors.request.use(
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+        
+        // Add request timestamp for retry logic
+        config.metadata = { startTime: new Date() };
+        
         console.log(`🌐 API Request: ${config.method?.toUpperCase()} ${config.url}`);
         return config;
     },
@@ -29,22 +63,52 @@ api.interceptors.request.use(
     }
 );
 
-// Response interceptor for error handling
+// Response interceptor for error handling and token refresh
 api.interceptors.response.use(
     (response) => {
-        console.log(`✅ API Response: ${response.status} ${response.config.url}`);
+        const endTime = new Date();
+        const duration = endTime - response.config.metadata.startTime;
+        console.log(`✅ API Response: ${response.status} ${response.config.url} (${duration}ms)`);
         return response;
     },
-    (error) => {
+    async (error) => {
+        const originalRequest = error.config;
+        
         console.error('❌ API Response Error:', error.response?.status, error.response?.data || error.message);
+        
+        // Handle 401 Unauthorized - try to refresh token
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+            
+            try {
+                const newToken = await refreshAuthToken();
+                originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                return api(originalRequest);
+            } catch (refreshError) {
+                console.error('🔄 Token refresh failed:', refreshError);
+                return Promise.reject(error);
+            }
+        }
         
         // Handle specific error cases
         if (error.response?.status === 404) {
             console.warn('🔍 Resource not found');
         } else if (error.response?.status === 400) {
             console.warn('⚠️ Validation error:', error.response.data);
+        } else if (error.response?.status === 403) {
+            console.warn('🚫 Access forbidden');
         } else if (error.response?.status >= 500) {
             console.error('🚨 Server error');
+        }
+        
+        // Retry logic for network errors
+        if (!error.response && !originalRequest._retry) {
+            originalRequest._retry = true;
+            console.log('🔄 Retrying request due to network error...');
+            
+            // Wait 1 second before retry
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            return api(originalRequest);
         }
         
         return Promise.reject(error);
@@ -222,7 +286,10 @@ export const statisticsAPI = {
 
 export const authAPI = {
     // Login
-    login: (username, password) => api.post('/auth/login', { username, password }),
+    login: (username, password) => {
+        console.log('🔧 API Login Debug:', { username, password: password ? '[HIDDEN]' : 'NO PASSWORD' });
+        return api.post('/auth/login', { email: username, password });
+    },
     
     // Register
     register: (userData) => api.post('/auth/register', userData),

@@ -21,6 +21,54 @@ app.get('/api/test', (req, res) => {
     });
 });
 
+// Debug login endpoint
+app.post('/api/debug-login', async (req, res) => {
+    try {
+        console.log('DEBUG: Request body:', req.body);
+        const { email, password } = req.body;
+        console.log('DEBUG: Extracted email:', email, 'password:', password ? '[PROVIDED]' : '[MISSING]');
+        
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                error: 'Validation error',
+                message: 'Email and password are required'
+            });
+        }
+        
+        // Try to find user
+        const User = require('./src/models/User');
+        console.log('DEBUG: Looking for user with email:', email);
+        const user = await User.findByEmail(email.toLowerCase().trim());
+        console.log('DEBUG: User found:', user ? 'YES' : 'NO');
+        
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+        
+        res.json({
+            success: true,
+            message: 'Debug successful',
+            user: {
+                id: user.id,
+                email: user.email,
+                role: user.role,
+                is_active: user.is_active
+            }
+        });
+        
+    } catch (error) {
+        console.error('DEBUG Login error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 // Routes
 app.use('/api/auth', require('./src/routes/auth'));
 app.use('/api/admin', require('./src/routes/admin'));

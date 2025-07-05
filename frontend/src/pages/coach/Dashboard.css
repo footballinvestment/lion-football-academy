@@ -1,0 +1,517 @@
+/* Coach Dashboard Layout */
+.coach-dashboard {
+    padding: var(--space-6);
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: calc(100vh - var(--navbar-height));
+}
+
+/* Header */
+.coach-dashboard__header {
+    margin-bottom: var(--space-8);
+}
+
+.coach-dashboard__header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+}
+
+.coach-dashboard__title h1 {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--gray-900);
+    margin-bottom: var(--space-2);
+    line-height: 1.2;
+}
+
+.coach-dashboard__subtitle {
+    font-size: var(--font-size-lg);
+    color: var(--gray-600);
+    margin: 0;
+}
+
+.coach-dashboard__header-actions {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+}
+
+.coach-dashboard__quick-action {
+    white-space: nowrap;
+}
+
+/* Loading State */
+.coach-dashboard__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    gap: var(--space-4);
+}
+
+.coach-dashboard__loading p {
+    color: var(--gray-600);
+    font-size: var(--font-size-lg);
+}
+
+/* Stats Grid */
+.coach-dashboard__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
+}
+
+/* Content Layout */
+.coach-dashboard__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+}
+
+.coach-dashboard__section {
+    width: 100%;
+}
+
+.coach-dashboard__columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+}
+
+.coach-dashboard__column {
+    min-width: 0;
+}
+
+/* Quick Actions */
+.coach-dashboard__quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-4);
+}
+
+.coach-dashboard__action-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    text-align: left;
+    height: auto;
+    min-height: 80px;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    background-color: var(--white);
+    transition: all var(--transition-fast);
+}
+
+.coach-dashboard__action-btn:hover {
+    border-color: var(--lion-primary);
+    background-color: var(--lion-primary-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.coach-dashboard__action-icon {
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background-color: var(--gray-100);
+    border-radius: var(--radius-lg);
+    flex-shrink: 0;
+}
+
+.coach-dashboard__action-content h3 {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+    margin: 0 0 var(--space-1) 0;
+    line-height: 1.2;
+}
+
+.coach-dashboard__action-content p {
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    margin: 0;
+    line-height: 1.3;
+}
+
+/* Activity List */
+.coach-dashboard__activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.coach-dashboard__activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast);
+}
+
+.coach-dashboard__activity-item:hover {
+    background-color: var(--gray-50);
+}
+
+.coach-dashboard__activity-icon {
+    font-size: 1.25rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--gray-100);
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+}
+
+.coach-dashboard__activity-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.coach-dashboard__activity-text {
+    font-size: var(--font-size-sm);
+    color: var(--gray-900);
+    margin: 0 0 var(--space-1) 0;
+    line-height: 1.4;
+}
+
+.coach-dashboard__activity-time {
+    font-size: var(--font-size-xs);
+    color: var(--gray-500);
+}
+
+/* Events List */
+.coach-dashboard__events-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.coach-dashboard__event-item {
+    display: flex;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast);
+}
+
+.coach-dashboard__event-item:hover {
+    background-color: var(--gray-50);
+}
+
+.coach-dashboard__event-priority {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-lg);
+    flex-shrink: 0;
+}
+
+.coach-dashboard__event-priority--high {
+    background-color: var(--error-light);
+    color: var(--error);
+}
+
+.coach-dashboard__event-priority--medium {
+    background-color: var(--warning-light);
+    color: var(--warning-dark);
+}
+
+.coach-dashboard__event-priority--low {
+    background-color: var(--info-light);
+    color: var(--info);
+}
+
+.coach-dashboard__event-icon {
+    font-size: 1.125rem;
+}
+
+.coach-dashboard__event-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.coach-dashboard__event-title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+    margin: 0 0 var(--space-1) 0;
+    line-height: 1.3;
+}
+
+.coach-dashboard__event-details {
+    font-size: var(--font-size-xs);
+    color: var(--gray-600);
+    margin: 0 0 var(--space-1) 0;
+    line-height: 1.3;
+}
+
+.coach-dashboard__event-location {
+    font-size: var(--font-size-xs);
+    color: var(--gray-500);
+    margin: 0;
+    line-height: 1.3;
+}
+
+/* Teams Grid */
+.coach-dashboard__teams-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-4);
+}
+
+.coach-dashboard__team-card {
+    display: block;
+    padding: var(--space-4);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    background-color: var(--white);
+    text-decoration: none;
+    color: inherit;
+    transition: all var(--transition-fast);
+}
+
+.coach-dashboard__team-card:hover {
+    border-color: var(--lion-primary);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    text-decoration: none;
+    color: inherit;
+}
+
+.coach-dashboard__team-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-3);
+}
+
+.coach-dashboard__team-header h3 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.coach-dashboard__team-category {
+    font-size: var(--font-size-xs);
+    color: var(--lion-primary);
+    background-color: var(--lion-primary-light);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.coach-dashboard__team-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+}
+
+.coach-dashboard__team-stat {
+    text-align: center;
+}
+
+.coach-dashboard__team-stat-label {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--gray-500);
+    margin-bottom: var(--space-1);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: var(--font-weight-medium);
+}
+
+.coach-dashboard__team-stat-value {
+    display: block;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+}
+
+/* Notifications */
+.coach-dashboard__notifications {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.coach-dashboard__notification {
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    border-left: 4px solid transparent;
+}
+
+.coach-dashboard__notification--info {
+    background-color: var(--info-light);
+    border-left-color: var(--info);
+}
+
+.coach-dashboard__notification--warning {
+    background-color: var(--warning-light);
+    border-left-color: var(--warning);
+}
+
+.coach-dashboard__notification--error {
+    background-color: var(--error-light);
+    border-left-color: var(--error);
+}
+
+.coach-dashboard__notification--success {
+    background-color: var(--success-light);
+    border-left-color: var(--success);
+}
+
+.coach-dashboard__notification-content h4 {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+    margin: 0 0 var(--space-1) 0;
+}
+
+.coach-dashboard__notification-content p {
+    font-size: var(--font-size-sm);
+    color: var(--gray-700);
+    margin: 0 0 var(--space-1) 0;
+    line-height: 1.4;
+}
+
+.coach-dashboard__notification-time {
+    font-size: var(--font-size-xs);
+    color: var(--gray-500);
+}
+
+/* Empty States */
+.coach-dashboard__empty-state {
+    text-align: center;
+    color: var(--gray-500);
+    font-style: italic;
+    padding: var(--space-6);
+}
+
+/* Responsive Design */
+@media (max-width: 1023px) {
+    .coach-dashboard {
+        padding: var(--space-4);
+    }
+
+    .coach-dashboard__columns {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+    }
+
+    .coach-dashboard__header-content {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .coach-dashboard__header-actions {
+        justify-content: stretch;
+    }
+
+    .coach-dashboard__quick-action {
+        flex: 1;
+    }
+
+    .coach-dashboard__quick-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .coach-dashboard__teams-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 767px) {
+    .coach-dashboard {
+        padding: var(--space-3);
+    }
+
+    .coach-dashboard__title h1 {
+        font-size: var(--font-size-2xl);
+    }
+
+    .coach-dashboard__stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-3);
+    }
+
+    .coach-dashboard__action-btn {
+        min-height: 70px;
+        padding: var(--space-3);
+    }
+
+    .coach-dashboard__action-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
+    }
+
+    .coach-dashboard__team-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-2);
+    }
+
+    .coach-dashboard__team-header {
+        flex-direction: column;
+        gap: var(--space-2);
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 479px) {
+    .coach-dashboard__stats {
+        grid-template-columns: 1fr;
+    }
+
+    .coach-dashboard__header-actions {
+        flex-direction: column;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .coach-dashboard__action-btn,
+    .coach-dashboard__team-card {
+        border-width: 2px;
+    }
+
+    .coach-dashboard__action-btn:hover,
+    .coach-dashboard__team-card:hover {
+        border-width: 2px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .coach-dashboard__header-actions,
+    .coach-dashboard__quick-actions {
+        display: none;
+    }
+
+    .coach-dashboard {
+        padding: 0;
+    }
+
+    .coach-dashboard__action-btn:hover,
+    .coach-dashboard__team-card:hover {
+        transform: none;
+        box-shadow: none;
+    }
+}

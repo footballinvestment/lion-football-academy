@@ -6,6 +6,7 @@ const Injury = require('../models/Injury');
 const Match = require('../models/Match');
 const Player = require('../models/Player');
 const Team = require('../models/Team');
+const analyticsController = require('../controllers/analyticsController');
 const { authenticate, isAdmin, isAdminOrCoach } = require('../middleware/auth');
 
 // Apply authentication to all analytics routes
@@ -630,5 +631,39 @@ function convertToCSV(data) {
     
     return `${headers.join(',')}\n${values.join(',')}`;
 }
+
+// =====================================================================
+// NEW ROLE-BASED ANALYTICS ENDPOINTS
+// =====================================================================
+
+// Player Analytics Routes
+router.get('/player/analytics/personal-stats', analyticsController.getPlayerPersonalStats);
+router.get('/player/analytics/performance-history', analyticsController.getPlayerPerformanceHistory);
+router.get('/player/analytics/skill-assessment', analyticsController.getPlayerSkillAssessment);
+router.get('/player/analytics/goal-analysis', analyticsController.getPlayerGoalAnalysis);
+router.get('/player/analytics/match-performance', analyticsController.getPlayerMatchPerformance);
+router.get('/player/analytics/team-contribution', analyticsController.getPlayerTeamContribution);
+router.get('/player/analytics/improvements', analyticsController.getPlayerImprovements);
+router.get('/player/analytics/share-stats', analyticsController.sharePlayerStats);
+
+// Parent Analytics Routes
+router.get('/parent/children', analyticsController.getParentChildren);
+router.get('/parent/analytics/child-progress', analyticsController.getParentChildProgress);
+router.get('/parent/analytics/skill-development', analyticsController.getParentSkillDevelopment);
+router.get('/parent/analytics/attendance-analysis', analyticsController.getParentAttendanceAnalysis);
+router.get('/parent/analytics/performance-trends', analyticsController.getParentPerformanceTrends);
+router.get('/parent/analytics/peer-comparison', analyticsController.getParentPeerComparison);
+router.get('/parent/analytics/achievement-timeline', analyticsController.getParentAchievementTimeline);
+router.get('/parent/analytics/generate-report', analyticsController.generateParentReport);
+
+// Coach Analytics Routes
+router.get('/coach/teams', analyticsController.getCoachTeams);
+router.get('/coach/analytics/overview', analyticsController.getCoachOverview);
+router.get('/coach/analytics/player-performance', analyticsController.getCoachPlayerPerformance);
+router.get('/coach/analytics/training-effectiveness', analyticsController.getCoachTrainingEffectiveness);
+router.get('/coach/analytics/match-analysis', analyticsController.getCoachMatchAnalysis);
+router.get('/coach/analytics/development-tracking', analyticsController.getCoachDevelopmentTracking);
+router.get('/coach/analytics/comparative-stats', analyticsController.getCoachComparativeStats);
+router.get('/coach/analytics/export', analyticsController.exportCoachAnalytics);
 
 module.exports = router;

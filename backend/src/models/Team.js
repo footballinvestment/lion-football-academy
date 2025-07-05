@@ -1,484 +1,298 @@
-const db = require('../database/connection');
+const database = require('../database/database');
 
 class Team {
-    static async create(teamData) {
-        const { name, age_group, season, coach_name, team_color } = teamData;
-        const sql = `
-            INSERT INTO teams (name, age_group, season, coach_name, team_color)
-            VALUES (?, ?, ?, ?, ?)
-        `;
-        return await db.run(sql, [name, age_group, season, coach_name, team_color]);
-    }
-
-    static async findAll() {
-        const sql = 'SELECT * FROM teams ORDER BY created_at DESC';
-        return await db.query(sql);
+    constructor(data = {}) {
+        this.id = data.id;
+        this.name = data.name;
+        this.age_group = data.age_group;
+        this.division = data.division;
+        this.season = data.season;
+        this.max_players = data.max_players || 25;
+        this.description = data.description;
+        this.is_active = data.is_active ?? true;
+        this.created_at = data.created_at;
+        this.updated_at = data.updated_at;
     }
 
     static async findById(id) {
-        const sql = 'SELECT * FROM teams WHERE id = ?';
-        const results = await db.query(sql, [id]);
-        return results[0] || null;
-    }
-
-    static async update(id, teamData) {
-        const { name, age_group, season, coach_name, team_color } = teamData;
-        const sql = `
-            UPDATE teams 
-            SET name = ?, age_group = ?, season = ?, coach_name = ?, team_color = ?
-            WHERE id = ?
-        `;
-        return await db.run(sql, [name, age_group, season, coach_name, team_color, id]);
-    }
-
-    static async delete(id) {
-        const sql = 'DELETE FROM teams WHERE id = ?';
-        return await db.run(sql, [id]);
-    }
-
-    static async getPlayersCount(teamId) {
-        const sql = 'SELECT COUNT(*) as count FROM players WHERE team_id = ?';
-        const result = await db.query(sql, [teamId]);
-        return result[0].count;
-    }
-
-    // =====================================================================
-    // SEASON STATISTICS AND MATCH RESULTS
-    // =====================================================================
-
-    /**
-     * Get team season statistics
-     * @param {number} teamId - Team ID
-     * @param {string} season - Optional season filter
-     * @returns {Promise<Object>} Team season statistics
-     */
-    static async getSeasonStats(teamId, season = null) {
         try {
-            let query = `
-                SELECT 
-                    COUNT(DISTINCT m.id) as matches_played,
-                    SUM(CASE WHEN (m.home_team_id = ? AND m.home_score > m.away_score) OR 
-                                  (m.away_team_id = ? AND m.away_score > m.home_score) THEN 1 ELSE 0 END) as wins,
-                    SUM(CASE WHEN m.home_score = m.away_score THEN 1 ELSE 0 END) as draws,
-                    SUM(CASE WHEN (m.home_team_id = ? AND m.home_score < m.away_score) OR 
-                                  (m.away_team_id = ? AND m.away_score < m.home_score) THEN 1 ELSE 0 END) as losses,
-                    SUM(CASE WHEN m.home_team_id = ? THEN m.home_score ELSE m.away_score END) as goals_for,
-                    SUM(CASE WHEN m.home_team_id = ? THEN m.away_score ELSE m.home_score END) as goals_against,
-                    COUNT(CASE WHEN m.home_team_id = ? THEN 1 END) as home_matches,
-                    COUNT(CASE WHEN m.away_team_id = ? THEN 1 END) as away_matches
-                FROM matches m
-                WHERE (m.home_team_id = ? OR m.away_team_id = ?) AND m.match_status = 'finished'
-            `;
-            
-            const params = [teamId, teamId, teamId, teamId, teamId, teamId, teamId, teamId, teamId, teamId];
-            
-            if (season) {
-                query += ' AND m.season = ?';
-                params.push(season);
-            }
-            
-            const results = await db.query(query, params);
-            const stats = results[0] || {};
-            
-            // Calculate additional metrics
-            if (stats.matches_played > 0) {
-                stats.win_percentage = ((stats.wins / stats.matches_played) * 100).toFixed(1);
-                stats.points = (stats.wins * 3) + stats.draws;
-                stats.goal_difference = stats.goals_for - stats.goals_against;
-                stats.goals_per_match = (stats.goals_for / stats.matches_played).toFixed(2);
-                stats.goals_conceded_per_match = (stats.goals_against / stats.matches_played).toFixed(2);
-            }
-            
-            return stats;
+            const team = await database.get('SELECT * FROM teams WHERE id = ?', [id]);
+            return team ? new Team(team) : null;
         } catch (error) {
-            throw new Error(`Failed to get team season statistics: ${error.message}`);
+            console.error('Error finding team by ID:', error);
+            throw error;
         }
     }
 
-    /**
-     * Get team match results
-     * @param {number} teamId - Team ID
-     * @param {Object} filters - Optional filters (season, match_type, limit)
-     * @returns {Promise<Array>} Team match results
-     */
-    static async getMatchResults(teamId, filters = {}) {
+    static async findAll(filters = {}) {
         try {
-            let query = `
-                SELECT 
-                    m.id, m.match_date, m.match_type, m.season, m.venue,
-                    ht.name as home_team, at.name as away_team,
-                    m.home_score, m.away_score, m.match_status,
-                    CASE WHEN m.home_team_id = ? THEN 'home' ELSE 'away' END as venue_type,
-                    CASE WHEN m.home_team_id = ? THEN m.home_score ELSE m.away_score END as team_score,
-                    CASE WHEN m.home_team_id = ? THEN m.away_score ELSE m.home_score END as opponent_score,
-                    CASE 
-                        WHEN (m.home_team_id = ? AND m.home_score > m.away_score) OR 
-                             (m.away_team_id = ? AND m.away_score > m.home_score) THEN 'W'
-                        WHEN m.home_score = m.away_score THEN 'D'
-                        ELSE 'L'
-                    END as result
-                FROM matches m
-                JOIN teams ht ON m.home_team_id = ht.id
-                JOIN teams at ON m.away_team_id = at.id
-                WHERE (m.home_team_id = ? OR m.away_team_id = ?)
-            `;
-            
-            const params = [teamId, teamId, teamId, teamId, teamId, teamId, teamId];
-            
+            let query = 'SELECT * FROM teams WHERE 1=1';
+            const params = [];
+
+            if (filters.is_active !== undefined) {
+                query += ' AND is_active = ?';
+                params.push(filters.is_active);
+            }
+
             if (filters.season) {
-                query += ' AND m.season = ?';
+                query += ' AND season = ?';
                 params.push(filters.season);
             }
-            
+
+            if (filters.age_group) {
+                query += ' AND age_group = ?';
+                params.push(filters.age_group);
+            }
+
+            query += ' ORDER BY name ASC';
+
+            const teams = await database.all(query, params);
+            return teams.map(team => new Team(team));
+        } catch (error) {
+            console.error('Error finding teams:', error);
+            throw error;
+        }
+    }
+
+    static async create(teamData) {
+        try {
+            if (!teamData.id) {
+                teamData.id = require('crypto').randomBytes(16).toString('hex');
+            }
+
+            await database.run(`
+                INSERT INTO teams (id, name, age_group, division, season, max_players, description, is_active)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `, [
+                teamData.id,
+                teamData.name,
+                teamData.age_group,
+                teamData.division,
+                teamData.season,
+                teamData.max_players || 25,
+                teamData.description,
+                teamData.is_active ?? true
+            ]);
+
+            return await Team.findById(teamData.id);
+        } catch (error) {
+            console.error('Error creating team:', error);
+            throw error;
+        }
+    }
+
+    async save() {
+        try {
+            if (!this.id) {
+                this.id = require('crypto').randomBytes(16).toString('hex');
+                await database.run(`
+                    INSERT INTO teams (id, name, age_group, division, season, max_players, description, is_active)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                `, [this.id, this.name, this.age_group, this.division, this.season, this.max_players, this.description, this.is_active]);
+            } else {
+                await database.run(`
+                    UPDATE teams SET name = ?, age_group = ?, division = ?, season = ?, 
+                                   max_players = ?, description = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                `, [this.name, this.age_group, this.division, this.season, this.max_players, this.description, this.is_active, this.id]);
+            }
+            return this;
+        } catch (error) {
+            console.error('Error saving team:', error);
+            throw error;
+        }
+    }
+
+    async delete() {
+        try {
+            if (!this.id) throw new Error('Cannot delete team without ID');
+            await database.run('DELETE FROM teams WHERE id = ?', [this.id]);
+            return true;
+        } catch (error) {
+            console.error('Error deleting team:', error);
+            throw error;
+        }
+    }
+
+    async getPlayers() {
+        try {
+            const players = await database.all(`
+                SELECT p.*, u.first_name, u.last_name, u.email, u.phone
+                FROM players p
+                JOIN users u ON p.user_id = u.id
+                WHERE p.team_id = ? AND p.is_active = 1
+                ORDER BY p.jersey_number ASC
+            `, [this.id]);
+            return players;
+        } catch (error) {
+            console.error('Error getting team players:', error);
+            throw error;
+        }
+    }
+
+    async getCoaches() {
+        try {
+            const coaches = await database.all(`
+                SELECT c.*, u.first_name, u.last_name, u.email, u.phone
+                FROM coaches c
+                JOIN users u ON c.user_id = u.id
+                WHERE c.team_id = ? AND c.is_active = 1
+                ORDER BY c.is_head_coach DESC, u.first_name ASC
+            `, [this.id]);
+            return coaches;
+        } catch (error) {
+            console.error('Error getting team coaches:', error);
+            throw error;
+        }
+    }
+
+    async getMatches(filters = {}) {
+        try {
+            let query = `
+                SELECT * FROM matches 
+                WHERE team_id = ?
+            `;
+            const params = [this.id];
+
+            if (filters.status) {
+                query += ' AND status = ?';
+                params.push(filters.status);
+            }
+
             if (filters.match_type) {
-                query += ' AND m.match_type = ?';
+                query += ' AND match_type = ?';
                 params.push(filters.match_type);
             }
-            
-            if (filters.match_status) {
-                query += ' AND m.match_status = ?';
-                params.push(filters.match_status);
-            }
-            
-            query += ' ORDER BY m.match_date DESC';
-            
+
+            query += ' ORDER BY match_date DESC';
+
             if (filters.limit) {
                 query += ' LIMIT ?';
                 params.push(filters.limit);
             }
-            
-            return await db.query(query, params);
+
+            return await database.all(query, params);
         } catch (error) {
-            throw new Error(`Failed to get team match results: ${error.message}`);
+            console.error('Error getting team matches:', error);
+            throw error;
         }
     }
 
-    /**
-     * Get team form (recent match results)
-     * @param {number} teamId - Team ID
-     * @param {number} lastMatches - Number of recent matches (default 5)
-     * @returns {Promise<Object>} Team form analysis
-     */
-    static async getTeamForm(teamId, lastMatches = 5) {
-        try {
-            const recentResults = await this.getMatchResults(teamId, { 
-                match_status: 'finished', 
-                limit: lastMatches 
-            });
-            
-            const formAnalysis = {
-                recent_matches: recentResults,
-                form_summary: {
-                    matches: recentResults.length,
-                    wins: 0,
-                    draws: 0,
-                    losses: 0,
-                    goals_for: 0,
-                    goals_against: 0,
-                    form_string: ''
-                }
-            };
-            
-            recentResults.forEach(match => {
-                if (match.result === 'W') formAnalysis.form_summary.wins++;
-                else if (match.result === 'D') formAnalysis.form_summary.draws++;
-                else if (match.result === 'L') formAnalysis.form_summary.losses++;
-                
-                formAnalysis.form_summary.goals_for += match.team_score || 0;
-                formAnalysis.form_summary.goals_against += match.opponent_score || 0;
-                formAnalysis.form_summary.form_string += match.result;
-            });
-            
-            return formAnalysis;
-        } catch (error) {
-            throw new Error(`Failed to get team form: ${error.message}`);
-        }
-    }
-
-    /**
-     * Get team player statistics
-     * @param {number} teamId - Team ID
-     * @param {string} season - Optional season filter
-     * @returns {Promise<Array>} Player statistics for the team
-     */
-    static async getPlayerStats(teamId, season = null) {
+    async getTrainings(filters = {}) {
         try {
             let query = `
-                SELECT 
-                    p.id, p.name, p.position,
-                    COUNT(DISTINCT pmp.match_id) as matches_played,
-                    SUM(pmp.goals) as goals,
-                    SUM(pmp.assists) as assists,
-                    SUM(pmp.minutes_played) as total_minutes,
-                    AVG(pmp.performance_rating) as avg_rating,
-                    COUNT(CASE WHEN pmp.starter = 1 THEN 1 END) as starts
-                FROM players p
-                LEFT JOIN player_match_performance pmp ON p.id = pmp.player_id
-                LEFT JOIN matches m ON pmp.match_id = m.id AND m.match_status = 'finished'
-                WHERE p.team_id = ?
-            `;
-            
-            const params = [teamId];
-            
-            if (season) {
-                query += ' AND m.season = ?';
-                params.push(season);
-            }
-            
-            query += ' GROUP BY p.id, p.name, p.position ORDER BY goals DESC, assists DESC';
-            
-            return await db.query(query, params);
-        } catch (error) {
-            throw new Error(`Failed to get team player statistics: ${error.message}`);
-        }
-    }
-
-    /**
-     * Get team health overview
-     * @param {number} teamId - Team ID
-     * @returns {Promise<Object>} Team health summary
-     */
-    static async getHealthOverview(teamId) {
-        try {
-            const query = `
-                SELECT * FROM team_health_overview
-                WHERE team_id = ?
-            `;
-            
-            const results = await db.query(query, [teamId]);
-            return results[0] || {};
-        } catch (error) {
-            throw new Error(`Failed to get team health overview: ${error.message}`);
-        }
-    }
-
-    /**
-     * Get team development overview
-     * @param {number} teamId - Team ID
-     * @param {string} season - Optional season filter
-     * @returns {Promise<Object>} Development overview
-     */
-    static async getDevelopmentOverview(teamId, season = null) {
-        try {
-            let query = `
-                SELECT 
-                    p.id, p.name as player_name,
-                    COUNT(dp.id) as total_plans,
-                    AVG(dp.completion_percentage) as avg_completion,
-                    COUNT(CASE WHEN dp.status = 'active' THEN 1 END) as active_plans,
-                    COUNT(CASE WHEN dp.status = 'completed' THEN 1 END) as completed_plans
-                FROM players p
-                LEFT JOIN development_plans dp ON p.id = dp.player_id
-                WHERE p.team_id = ?
-            `;
-            
-            const params = [teamId];
-            
-            if (season) {
-                query += ' AND dp.season = ?';
-                params.push(season);
-            }
-            
-            query += ' GROUP BY p.id, p.name ORDER BY avg_completion DESC';
-            
-            const playerProgress = await db.query(query, params);
-            
-            // Get team development statistics
-            let statsQuery = `
-                SELECT 
-                    COUNT(DISTINCT dp.player_id) as players_with_plans,
-                    COUNT(dp.id) as total_plans,
-                    AVG(dp.completion_percentage) as team_avg_completion,
-                    COUNT(CASE WHEN dp.status = 'active' THEN 1 END) as active_plans,
-                    COUNT(CASE WHEN dp.plan_type = 'technical' THEN 1 END) as technical_plans,
-                    COUNT(CASE WHEN dp.plan_type = 'physical' THEN 1 END) as physical_plans,
-                    COUNT(CASE WHEN dp.plan_type = 'tactical' THEN 1 END) as tactical_plans,
-                    COUNT(CASE WHEN dp.plan_type = 'mental' THEN 1 END) as mental_plans
-                FROM development_plans dp
-                JOIN players p ON dp.player_id = p.id
-                WHERE p.team_id = ?
-            `;
-            
-            const statsParams = [teamId];
-            
-            if (season) {
-                statsQuery += ' AND dp.season = ?';
-                statsParams.push(season);
-            }
-            
-            const teamStats = await db.query(statsQuery, statsParams);
-            
-            return {
-                player_progress: playerProgress,
-                team_statistics: teamStats[0] || {}
-            };
-        } catch (error) {
-            throw new Error(`Failed to get team development overview: ${error.message}`);
-        }
-    }
-
-    /**
-     * Get upcoming team fixtures
-     * @param {number} teamId - Team ID
-     * @param {number} days - Days ahead to look (default 30)
-     * @returns {Promise<Array>} Upcoming fixtures
-     */
-    static async getUpcomingFixtures(teamId, days = 30) {
-        try {
-            const query = `
-                SELECT 
-                    m.*, ht.name as home_team, at.name as away_team,
-                    CASE WHEN m.home_team_id = ? THEN 'home' ELSE 'away' END as venue_type
-                FROM matches m
-                JOIN teams ht ON m.home_team_id = ht.id
-                JOIN teams at ON m.away_team_id = at.id
-                WHERE (m.home_team_id = ? OR m.away_team_id = ?)
-                AND m.match_status IN ('scheduled', 'ongoing')
-                AND m.match_date BETWEEN DATE('now') AND DATE('now', '+${days} days')
-                ORDER BY m.match_date ASC, m.match_time ASC
-            `;
-            
-            return await db.query(query, [teamId, teamId, teamId]);
-        } catch (error) {
-            throw new Error(`Failed to get upcoming fixtures: ${error.message}`);
-        }
-    }
-
-    /**
-     * Get team attendance statistics
-     * @param {number} teamId - Team ID
-     * @param {Object} filters - Optional filters (date_from, date_to)
-     * @returns {Promise<Object>} Team attendance statistics
-     */
-    static async getAttendanceStats(teamId, filters = {}) {
-        try {
-            let query = `
-                SELECT 
-                    COUNT(DISTINCT t.id) as total_trainings,
-                    COUNT(DISTINCT a.player_id) as unique_players,
-                    COUNT(a.id) as total_attendances,
-                    COUNT(CASE WHEN a.status = 'present' THEN 1 END) as present_count,
-                    COUNT(CASE WHEN a.status = 'absent' THEN 1 END) as absent_count,
-                    COUNT(CASE WHEN a.status = 'late' THEN 1 END) as late_count,
-                    ROUND(COUNT(CASE WHEN a.status = 'present' THEN 1 END) * 100.0 / COUNT(a.id), 1) as attendance_percentage,
-                    AVG(a.performance_rating) as avg_performance_rating
+                SELECT t.*, c.user_id as coach_user_id, u.first_name as coach_first_name, u.last_name as coach_last_name
                 FROM trainings t
-                LEFT JOIN attendance a ON t.id = a.training_id
+                JOIN coaches c ON t.coach_id = c.id
+                JOIN users u ON c.user_id = u.id
                 WHERE t.team_id = ?
             `;
-            
-            const params = [teamId];
-            
-            if (filters.date_from) {
-                query += ' AND t.date >= ?';
-                params.push(filters.date_from);
+            const params = [this.id];
+
+            if (filters.status) {
+                query += ' AND t.status = ?';
+                params.push(filters.status);
             }
-            
-            if (filters.date_to) {
-                query += ' AND t.date <= ?';
-                params.push(filters.date_to);
+
+            query += ' ORDER BY t.training_date DESC';
+
+            if (filters.limit) {
+                query += ' LIMIT ?';
+                params.push(filters.limit);
             }
-            
-            const results = await db.query(query, params);
-            return results[0] || {};
+
+            return await database.all(query, params);
         } catch (error) {
-            throw new Error(`Failed to get team attendance statistics: ${error.message}`);
+            console.error('Error getting team trainings:', error);
+            throw error;
         }
     }
 
-    /**
-     * Get comprehensive team overview
-     * @param {number} teamId - Team ID
-     * @param {string} season - Optional season filter
-     * @returns {Promise<Object>} Complete team overview
-     */
-    static async getTeamOverview(teamId, season = null) {
+    async getStats() {
         try {
-            // Get basic team info
-            const team = await this.findById(teamId);
-            if (!team) {
-                throw new Error('Team not found');
-            }
-
-            // Get all the statistics
-            const [
-                seasonStats,
-                playerStats,
-                healthOverview,
-                developmentOverview,
-                upcomingFixtures,
-                attendanceStats,
-                recentForm
-            ] = await Promise.all([
-                this.getSeasonStats(teamId, season),
-                this.getPlayerStats(teamId, season),
-                this.getHealthOverview(teamId),
-                this.getDevelopmentOverview(teamId, season),
-                this.getUpcomingFixtures(teamId),
-                this.getAttendanceStats(teamId),
-                this.getTeamForm(teamId, 5)
-            ]);
-
-            return {
-                team_info: team,
-                season_statistics: seasonStats,
-                player_statistics: playerStats,
-                health_overview: healthOverview,
-                development_overview: developmentOverview,
-                upcoming_fixtures: upcomingFixtures,
-                attendance_statistics: attendanceStats,
-                recent_form: recentForm,
-                player_count: await this.getPlayersCount(teamId)
+            const stats = {
+                player_count: 0,
+                coach_count: 0,
+                matches_played: 0,
+                wins: 0,
+                draws: 0,
+                losses: 0,
+                trainings_completed: 0
             };
-        } catch (error) {
-            throw new Error(`Failed to get team overview: ${error.message}`);
-        }
-    }
 
-    /**
-     * Compare team performance with league/division
-     * @param {number} teamId - Team ID
-     * @param {string} season - Season for comparison
-     * @param {string} division - Optional division filter
-     * @returns {Promise<Object>} Team performance comparison
-     */
-    static async compareWithLeague(teamId, season, division = null) {
-        try {
-            const teamStats = await this.getSeasonStats(teamId, season);
-            
-            // Get league averages
-            let leagueQuery = `
+            // Get player count
+            const playerCount = await database.get(
+                'SELECT COUNT(*) as count FROM players WHERE team_id = ? AND is_active = 1',
+                [this.id]
+            );
+            stats.player_count = playerCount.count;
+
+            // Get coach count
+            const coachCount = await database.get(
+                'SELECT COUNT(*) as count FROM coaches WHERE team_id = ? AND is_active = 1',
+                [this.id]
+            );
+            stats.coach_count = coachCount.count;
+
+            // Get match stats
+            const matchStats = await database.all(`
                 SELECT 
-                    AVG(goals_for) as avg_goals_for,
-                    AVG(goals_against) as avg_goals_against,
-                    AVG(wins) as avg_wins,
-                    AVG(matches_played) as avg_matches_played
-                FROM team_performance
-                WHERE 1=1
-            `;
-            
-            const params = [];
-            
-            if (division) {
-                // This would need to be implemented based on how divisions are stored
-                // leagueQuery += ' AND division = ?';
-                // params.push(division);
+                    COUNT(*) as total_matches,
+                    SUM(CASE WHEN home_score > away_score AND is_home_game = 1 THEN 1 
+                             WHEN home_score < away_score AND is_home_game = 0 THEN 1 
+                             ELSE 0 END) as wins,
+                    SUM(CASE WHEN home_score = away_score THEN 1 ELSE 0 END) as draws,
+                    SUM(CASE WHEN home_score < away_score AND is_home_game = 1 THEN 1 
+                             WHEN home_score > away_score AND is_home_game = 0 THEN 1 
+                             ELSE 0 END) as losses
+                FROM matches 
+                WHERE team_id = ? AND status = 'completed'
+            `, [this.id]);
+
+            if (matchStats.length > 0) {
+                stats.matches_played = matchStats[0].total_matches;
+                stats.wins = matchStats[0].wins;
+                stats.draws = matchStats[0].draws;
+                stats.losses = matchStats[0].losses;
             }
-            
-            const leagueStats = await db.query(leagueQuery, params);
-            
-            return {
-                team_stats: teamStats,
-                league_averages: leagueStats[0] || {},
-                comparison: {
-                    goals_for_vs_avg: teamStats.goals_for ? teamStats.goals_for / (leagueStats[0]?.avg_goals_for || 1) : 0,
-                    goals_against_vs_avg: teamStats.goals_against ? teamStats.goals_against / (leagueStats[0]?.avg_goals_against || 1) : 0,
-                    wins_vs_avg: teamStats.wins ? teamStats.wins / (leagueStats[0]?.avg_wins || 1) : 0
-                }
-            };
+
+            // Get training stats
+            const trainingStats = await database.get(
+                'SELECT COUNT(*) as count FROM trainings WHERE team_id = ? AND status = "completed"',
+                [this.id]
+            );
+            stats.trainings_completed = trainingStats.count;
+
+            return stats;
         } catch (error) {
-            throw new Error(`Failed to compare with league: ${error.message}`);
+            console.error('Error getting team stats:', error);
+            throw error;
         }
+    }
+
+    static validate(teamData) {
+        const errors = [];
+
+        if (!teamData.name || teamData.name.trim().length < 2) {
+            errors.push('Team name must be at least 2 characters');
+        }
+
+        if (!teamData.age_group || teamData.age_group.trim().length < 2) {
+            errors.push('Age group is required');
+        }
+
+        if (!teamData.season || teamData.season.trim().length < 4) {
+            errors.push('Season is required');
+        }
+
+        if (teamData.max_players && (teamData.max_players < 10 || teamData.max_players > 50)) {
+            errors.push('Max players must be between 10 and 50');
+        }
+
+        return {
+            isValid: errors.length === 0,
+            errors
+        };
     }
 }
 

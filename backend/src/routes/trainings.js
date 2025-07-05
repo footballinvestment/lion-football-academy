@@ -1,277 +1,417 @@
 const express = require('express');
 const router = express.Router();
-const Training = require('../models/Training');
-const Attendance = require('../models/Attendance');
-const Player = require('../models/Player');
-const { authenticate, isAdminOrCoach, canAccessTeam } = require('../middleware/auth');
+const database = require('../database/database');
+const { authenticate, authorize, rateLimit, securityHeaders } = require('../middleware/auth');
 
-const validateTraining = (trainingData) => {
-    const errors = [];
-    if (!trainingData.date) {
-        errors.push('Dátum kötelező');
-    }
-    if (!trainingData.time) {
-        errors.push('Időpont kötelező');
-    }
-    if (!trainingData.type || trainingData.type.trim() === '') {
-        errors.push('Edzés típusa kötelező');
-    }
-    return errors;
-};
+// Apply security headers to all routes
+router.use(securityHeaders);
 
-// GET /api/trainings - Team-based edzések listája
-router.get('/', authenticate, async (req, res) => {
+// Apply rate limiting to training routes
+router.use(rateLimit({
+    maxRequests: 200,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    message: 'Too many training requests, please try again later'
+}));
+
+// All routes require authentication
+router.use(authenticate);
+
+// GET /api/trainings - List trainings with role-based filtering
+router.get('/', async (req, res) => {
     try {
-        if (req.user.role === 'admin') {
-            // Admin minden edzést lát
-            const { team_id, start_date, end_date, limit } = req.query;
-            
-            let trainings;
-            if (start_date && end_date) {
-                trainings = await Training.findByDateRange(start_date, end_date, team_id);
-            } else if (team_id) {
-                trainings = await Training.findByTeam(team_id);
-            } else {
-                trainings = await Training.findAll();
-            }
-            
-            if (limit) {
-                trainings = trainings.slice(0, parseInt(limit));
-            }
-            
-            return res.json(trainings);
-        }
+        const { status, from_date, to_date, limit = 50, offset = 0 } = req.query;
         
-        if (req.user.team_id) {
-            // Coach/Parent csak saját csapat edzéseit
-            const { start_date, end_date, limit } = req.query;
+        let query = `
+            SELECT 
+                t.*,
+                tm.name as team_name
+            FROM trainings t
+            JOIN teams tm ON t.team_id = tm.id
+            WHERE 1=1
+        `;
+        const params = [];
+
+        // Role-based filtering
+        if (req.user.role === 'coach') {
+            // Get coach's team
+            const coach = await database.get(`
+                SELECT team_id FROM coaches WHERE user_id = ?
+            `, [req.user.id]);
             
-            let trainings;
-            if (start_date && end_date) {
-                trainings = await Training.findByDateRange(start_date, end_date, req.user.team_id);
+            if (coach && coach.team_id) {
+                query += ' AND t.team_id = ?';
+                params.push(coach.team_id);
             } else {
-                trainings = await Training.findByTeam(req.user.team_id);
+                return res.json({ success: true, trainings: [], count: 0 });
             }
+        } else if (req.user.role === 'player') {
+            // Get player's team
+            const player = await database.get(`
+                SELECT team_id FROM players WHERE user_id = ?
+            `, [req.user.id]);
             
-            if (limit) {
-                trainings = trainings.slice(0, parseInt(limit));
+            if (player && player.team_id) {
+                query += ' AND t.team_id = ?';
+                params.push(player.team_id);
+            } else {
+                return res.json({ success: true, trainings: [], count: 0 });
             }
+        } else if (req.user.role === 'parent') {
+            // Get parent's children teams
+            const childrenTeams = await database.all(`
+                SELECT DISTINCT p.team_id
+                FROM family_relationships fr
+                JOIN players p ON fr.player_id = p.id
+                WHERE fr.parent_id = ? AND p.team_id IS NOT NULL
+            `, [req.user.id]);
             
-            return res.json(trainings);
+            if (childrenTeams.length > 0) {
+                const teamIds = childrenTeams.map(ct => ct.team_id);
+                const placeholders = teamIds.map(() => '?').join(',');
+                query += ` AND t.team_id IN (${placeholders})`;
+                params.push(...teamIds);
+            } else {
+                return res.json({ success: true, trainings: [], count: 0 });
+            }
         }
-        
-        res.json([]);
+        // Admin sees all trainings (no additional filtering)
+
+        // Apply additional filters
+        if (status) {
+            query += ' AND t.status = ?';
+            params.push(status);
+        }
+
+        if (from_date) {
+            query += ' AND t.training_date >= ?';
+            params.push(from_date);
+        }
+
+        if (to_date) {
+            query += ' AND t.training_date <= ?';
+            params.push(to_date);
+        }
+
+        query += ' ORDER BY t.training_date DESC LIMIT ? OFFSET ?';
+        params.push(parseInt(limit), parseInt(offset));
+
+        const trainings = await database.all(query, params);
+
+        res.status(200).json({
+            success: true,
+            message: 'Trainings retrieved successfully',
+            trainings,
+            count: trainings.length
+        });
+
     } catch (error) {
         console.error('Trainings fetch error:', error);
-        res.status(500).json({ error: 'Server error fetching trainings' });
-    }
-});
-
-// GET /api/trainings/upcoming - Közelgő edzések team-based filtering
-router.get('/upcoming', authenticate, async (req, res) => {
-    try {
-        const { limit = 10 } = req.query;
-        let teamId = req.query.team_id;
-        
-        if (req.user.role === 'admin') {
-            // Admin minden edzést lát, team_id query param alapján szűr
-            const upcomingTrainings = await Training.getUpcoming(teamId, parseInt(limit));
-            return res.json(upcomingTrainings);
-        }
-        
-        if (req.user.team_id) {
-            // Coach/Parent csak saját csapat edzéseit
-            const upcomingTrainings = await Training.getUpcoming(req.user.team_id, parseInt(limit));
-            return res.json(upcomingTrainings);
-        }
-        
-        res.json([]);
-    } catch (error) {
-        console.error('Upcoming trainings fetch error:', error);
-        res.status(500).json({ error: 'Server error fetching upcoming trainings' });
-    }
-});
-
-// GET /api/trainings/:id - Edzés részletei
-router.get('/:id', authenticate, async (req, res) => {
-    try {
-        const training = await Training.findById(req.params.id);
-        if (!training) {
-            return res.status(404).json({ error: 'Edzés nem található' });
-        }
-        
-        // Access control: csak admin vagy saját csapat edzéseit láthatja
-        if (req.user.role !== 'admin' && req.user.team_id !== training.team_id) {
-            return res.status(403).json({ error: 'Access denied to this training' });
-        }
-        
-        // Jelenlét adatok lekérése
-        const attendance = await Attendance.findByTraining(req.params.id);
-        const trainingStats = await Attendance.getTrainingStats(req.params.id);
-        
-        res.json({
-            ...training,
-            attendance,
-            stats: trainingStats
+        res.status(500).json({
+            success: false,
+            error: 'Server error',
+            message: 'Failed to retrieve trainings'
         });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
     }
 });
 
-// POST /api/trainings - Új edzés létrehozása
-router.post('/', authenticate, isAdminOrCoach, async (req, res) => {
+// POST /api/trainings - Create new training (coach/admin only)
+router.post('/', authorize(['admin', 'coach']), async (req, res) => {
     try {
-        const errors = validateTraining(req.body);
-        if (errors.length > 0) {
-            return res.status(400).json({ errors });
+        const {
+            training_date,
+            start_time,
+            end_time,
+            training_type,
+            focus_areas,
+            location,
+            notes
+        } = req.body;
+
+        // Validate required fields
+        if (!training_date || !start_time || !training_type) {
+            return res.status(400).json({
+                success: false,
+                error: 'Validation error',
+                message: 'training_date, start_time, and training_type are required'
+            });
         }
 
-        const result = await Training.create(req.body);
-        const newTraining = await Training.findById(result.id);
-        
-        // Ha van team_id, automatikusan létrehozzuk a jelenlét rekordokat
-        if (req.body.team_id) {
-            const players = await Player.findByTeam(req.body.team_id);
-            const playerIds = players.map(player => player.id);
+        // Get team_id based on role
+        let team_id;
+        if (req.user.role === 'coach') {
+            const coach = await database.get(`
+                SELECT team_id FROM coaches WHERE user_id = ?
+            `, [req.user.id]);
             
-            if (playerIds.length > 0) {
-                await Attendance.bulkCreateForTraining(result.id, playerIds);
+            if (!coach || !coach.team_id) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'No team assigned',
+                    message: 'Coach is not assigned to any team'
+                });
+            }
+            team_id = coach.team_id;
+        } else {
+            // Admin can specify team_id
+            team_id = req.body.team_id;
+            if (!team_id) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Validation error',
+                    message: 'team_id is required for admin users'
+                });
             }
         }
-        
-        res.status(201).json(newTraining);
+
+        const trainingId = require('crypto').randomBytes(16).toString('hex');
+
+        await database.run(`
+            INSERT INTO trainings (
+                id, team_id, training_date, start_time, end_time,
+                training_type, focus_areas, location, notes, status,
+                created_by
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'scheduled', ?)
+        `, [
+            trainingId,
+            team_id,
+            training_date,
+            start_time,
+            end_time,
+            training_type,
+            focus_areas,
+            location,
+            notes,
+            req.user.id
+        ]);
+
+        // Get the created training
+        const newTraining = await database.get(`
+            SELECT 
+                t.*,
+                tm.name as team_name
+            FROM trainings t
+            JOIN teams tm ON t.team_id = tm.id
+            WHERE t.id = ?
+        `, [trainingId]);
+
+        res.status(201).json({
+            success: true,
+            message: 'Training created successfully',
+            training: newTraining
+        });
+
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Training creation error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Server error',
+            message: 'Failed to create training'
+        });
     }
 });
 
-// PUT /api/trainings/:id - Edzés módosítása
-router.put('/:id', authenticate, isAdminOrCoach, async (req, res) => {
+// PUT /api/trainings/:id/attendance - Mark attendance
+router.put('/:id/attendance', authorize(['admin', 'coach']), async (req, res) => {
     try {
-        const errors = validateTraining(req.body);
-        if (errors.length > 0) {
-            return res.status(400).json({ errors });
-        }
-
-        const existingTraining = await Training.findById(req.params.id);
-        if (!existingTraining) {
-            return res.status(404).json({ error: 'Edzés nem található' });
-        }
-
-        await Training.update(req.params.id, req.body);
-        const updatedTraining = await Training.findById(req.params.id);
-        res.json(updatedTraining);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// DELETE /api/trainings/:id - Edzés törlése
-router.delete('/:id', authenticate, isAdminOrCoach, async (req, res) => {
-    try {
-        const existingTraining = await Training.findById(req.params.id);
-        if (!existingTraining) {
-            return res.status(404).json({ error: 'Edzés nem található' });
-        }
-
-        await Training.delete(req.params.id);
-        res.json({ message: 'Edzés sikeresen törölve' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// GET /api/trainings/team/:teamId - Csapat edzései
-router.get('/team/:teamId', authenticate, canAccessTeam, async (req, res) => {
-    try {
-        const trainings = await Training.findByTeam(req.params.teamId);
-        res.json(trainings);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// POST /api/trainings/:id/attendance - Jelenlét rögzítése
-router.post('/:id/attendance', authenticate, isAdminOrCoach, async (req, res) => {
-    try {
-        const training = await Training.findById(req.params.id);
-        if (!training) {
-            return res.status(404).json({ error: 'Edzés nem található' });
-        }
-
-        const { attendanceData } = req.body; // [{ playerId, present, notes, performance_rating, late_minutes }]
+        const { attendanceData } = req.body;
         
         if (!Array.isArray(attendanceData)) {
-            return res.status(400).json({ error: 'Jelenlét adatok tömb formátumban szükségesek' });
+            return res.status(400).json({
+                success: false,
+                error: 'Validation error',
+                message: 'attendanceData must be an array'
+            });
+        }
+        
+        // Get training and verify access
+        const training = await database.get(`
+            SELECT * FROM trainings WHERE id = ?
+        `, [req.params.id]);
+        
+        if (!training) {
+            return res.status(404).json({
+                success: false,
+                error: 'Training not found',
+                message: 'Training with specified ID does not exist'
+            });
+        }
+
+        // Access control for coaches
+        if (req.user.role === 'coach') {
+            const coach = await database.get(`
+                SELECT team_id FROM coaches WHERE user_id = ?
+            `, [req.user.id]);
+            
+            if (!coach || coach.team_id !== training.team_id) {
+                return res.status(403).json({
+                    success: false,
+                    error: 'Access denied',
+                    message: 'You can only mark attendance for your own team trainings'
+                });
+            }
         }
 
         const results = [];
         for (const attendance of attendanceData) {
-            const { playerId, present, notes, performance_rating, late_minutes, absence_reason } = attendance;
+            const {
+                player_id,
+                attendance_status,
+                performance_rating,
+                notes
+            } = attendance;
             
-            // Ellenőrizzük, hogy létezik-e már jelenlét rekord
-            const existingAttendance = await Attendance.findByTraining(req.params.id);
-            const existingRecord = existingAttendance.find(a => a.player_id == playerId);
-            
-            if (existingRecord) {
-                // Frissítjük a meglévő rekordot
-                await Attendance.update(existingRecord.id, {
-                    present: present ? 1 : 0,
-                    late_minutes: late_minutes || 0,
-                    absence_reason: absence_reason || null,
-                    performance_rating: performance_rating || null,
-                    notes: notes || null
-                });
-                results.push({ playerId, action: 'updated' });
-            } else {
-                // Új rekord létrehozása
-                await Attendance.create({
-                    player_id: playerId,
-                    training_id: req.params.id,
-                    present: present ? 1 : 0,
-                    late_minutes: late_minutes || 0,
-                    absence_reason: absence_reason || null,
-                    performance_rating: performance_rating || null,
-                    notes: notes || null
-                });
-                results.push({ playerId, action: 'created' });
+            if (!player_id || !attendance_status) {
+                continue; // Skip invalid entries
             }
+
+            // Verify player belongs to the team
+            const player = await database.get(`
+                SELECT team_id FROM players WHERE id = ?
+            `, [player_id]);
+            
+            if (!player || player.team_id !== training.team_id) {
+                results.push({ player_id, status: 'error', message: 'Player not in team' });
+                continue;
+            }
+
+            // Insert or update attendance
+            await database.run(`
+                INSERT OR REPLACE INTO training_participants (
+                    training_id, player_id, attendance_status,
+                    performance_rating, notes
+                ) VALUES (?, ?, ?, ?, ?)
+            `, [
+                req.params.id,
+                player_id,
+                attendance_status,
+                performance_rating,
+                notes
+            ]);
+            
+            results.push({ player_id, status: 'success' });
         }
         
-        res.json({ 
-            message: 'Jelenlét sikeresen rögzítve',
-            results 
+        res.status(200).json({
+            success: true,
+            message: 'Attendance marked successfully',
+            results
         });
+        
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Attendance marking error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Server error',
+            message: 'Failed to mark attendance'
+        });
     }
 });
 
-// GET /api/trainings/:id/attendance - Edzés jelenléti adatok
-router.get('/:id/attendance', authenticate, async (req, res) => {
+// GET /api/trainings/:id/participants - Get attendance list
+router.get('/:id/participants', async (req, res) => {
     try {
-        const training = await Training.findById(req.params.id);
-        if (!training) {
-            return res.status(404).json({ error: 'Edzés nem található' });
-        }
-
-        // Access control: csak admin vagy saját csapat edzéseit láthatja
-        if (req.user.role !== 'admin' && req.user.team_id !== training.team_id) {
-            return res.status(403).json({ error: 'Access denied to this training attendance' });
-        }
-
-        const attendance = await Attendance.findByTraining(req.params.id);
-        const stats = await Attendance.getTrainingStats(req.params.id);
+        // Get training and verify access
+        const training = await database.get(`
+            SELECT * FROM trainings WHERE id = ?
+        `, [req.params.id]);
         
-        res.json({
-            training_id: req.params.id,
-            attendance,
-            stats
+        if (!training) {
+            return res.status(404).json({
+                success: false,
+                error: 'Training not found',
+                message: 'Training with specified ID does not exist'
+            });
+        }
+
+        // Role-based access control
+        let hasAccess = false;
+        if (req.user.role === 'admin') {
+            hasAccess = true;
+        } else if (req.user.role === 'coach') {
+            const coach = await database.get(`
+                SELECT team_id FROM coaches WHERE user_id = ?
+            `, [req.user.id]);
+            hasAccess = coach && coach.team_id === training.team_id;
+        } else if (req.user.role === 'player') {
+            const player = await database.get(`
+                SELECT team_id FROM players WHERE user_id = ?
+            `, [req.user.id]);
+            hasAccess = player && player.team_id === training.team_id;
+        } else if (req.user.role === 'parent') {
+            const childrenTeams = await database.all(`
+                SELECT DISTINCT p.team_id
+                FROM family_relationships fr
+                JOIN players p ON fr.player_id = p.id
+                WHERE fr.parent_id = ?
+            `, [req.user.id]);
+            hasAccess = childrenTeams.some(ct => ct.team_id === training.team_id);
+        }
+
+        if (!hasAccess) {
+            return res.status(403).json({
+                success: false,
+                error: 'Access denied',
+                message: 'You do not have permission to view this training participants'
+            });
+        }
+
+        // Get participants with attendance data
+        const participants = await database.all(`
+            SELECT 
+                p.id as player_id,
+                p.jersey_number,
+                p.position,
+                u.first_name,
+                u.last_name,
+                tp.attendance_status,
+                tp.performance_rating,
+                tp.notes
+            FROM players p
+            JOIN users u ON p.user_id = u.id
+            LEFT JOIN training_participants tp ON p.id = tp.player_id AND tp.training_id = ?
+            WHERE p.team_id = ? AND p.is_active = 1
+            ORDER BY p.jersey_number ASC
+        `, [req.params.id, training.team_id]);
+
+        // Get attendance statistics
+        const stats = await database.get(`
+            SELECT 
+                COUNT(*) as total_players,
+                COUNT(CASE WHEN tp.attendance_status = 'present' THEN 1 END) as present,
+                COUNT(CASE WHEN tp.attendance_status = 'absent' THEN 1 END) as absent,
+                COUNT(CASE WHEN tp.attendance_status = 'late' THEN 1 END) as late,
+                AVG(tp.performance_rating) as avg_performance_rating
+            FROM players p
+            LEFT JOIN training_participants tp ON p.id = tp.player_id AND tp.training_id = ?
+            WHERE p.team_id = ? AND p.is_active = 1
+        `, [req.params.id, training.team_id]);
+
+        res.status(200).json({
+            success: true,
+            message: 'Training participants retrieved successfully',
+            training: {
+                id: training.id,
+                training_date: training.training_date,
+                training_type: training.training_type,
+                status: training.status
+            },
+            participants,
+            statistics: stats
         });
+
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Training participants fetch error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Server error',
+            message: 'Failed to retrieve training participants'
+        });
     }
 });
+
+
+
+
+
 
 module.exports = router;
